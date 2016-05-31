@@ -1,0 +1,22 @@
+<!-- <?xml version="1.0" encoding="UTF-8"?> -->
+<Configuration>
+	<Appenders>
+		<RollingFile name="file" fileName="D:/logs/photobook.log"
+		filePattern="D:/logs/photobook-%d{MM-dd-yyyy}.log.gz" ignoreExceptions="false">
+<!-- 			filePattern="${CATALINA_HOME}/logs/photobook-%d{MM-dd-yyyy}.log.gz" ignoreExceptions="false"> -->
+			<PatternLayout>
+				<Pattern>%d %p %c{1.} [%t] %m%n</Pattern>
+			</PatternLayout>
+			<TimeBasedTriggeringPolicy />
+		</RollingFile>
+		<Console name="console" target="SYSTEM_OUT">
+			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
+		</Console>
+	</Appenders>
+	<Loggers>
+		<Root level="DEBUG">
+			<AppenderRef ref="file" />
+			<AppenderRef ref="console" />
+		</Root>
+	</Loggers>
+</Configuration>

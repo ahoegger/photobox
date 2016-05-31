@@ -1,0 +1,17 @@
+<div id="picturebox-picture-view"
+	ng-class="{'full-screen' : pictureViewController.fullScreen}">
+
+	<photobox-image-swipe files="pictureViewController.folder.pictures"
+		index="{{pictureViewController.index}}"
+		image-selection="pictureViewController.handleImgClick"
+		index-updated="pictureViewController.handleIndexUpdated">
+	</photobox-image-swipe>
+
+	<div class="navigation" ng-if="!pictureViewController.fullScreen")>	
+		<i class="fa fa-chevron-left clickable"
+			ng-click="pictureViewController.navigateFolder()" aria-hidden="true">{{pictureViewController.folder.name}}
+		</i>
+		<div>{{pictureViewController.image.name}}</div>
+		<div>{{pictureViewController.image.captureDate}}</div>
+	</div>
+</div>

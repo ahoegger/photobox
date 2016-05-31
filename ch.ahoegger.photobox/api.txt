@@ -1,0 +1,36 @@
+## data url
+api/d/[path to folder]
+  -> ResourceDescription[
+      ImageDescription[]
+      FolderDescription[]
+    ]
+    
+/api/i/[path to file]
+  -> ImageDescription
+
+
+
+## web url
+/[d/i]/(foldername/image)?
+  d für directory
+  i für image
+
+
+## rest api
+/rest/resources/[path]  -> return
+  {
+    resourceName:"06-Ilja",
+    resourceUri: /rest/resources/06-Ilja,
+    previewUri: /data/folder_preview.jpg,
+    imageUri: ,
+    children:[/rest/resources/06-Ilja, /rest/resources/SubFolder]
+  }
+  oder
+  {
+    resourceName:"sample",
+    resourceUri: /rest/resources/06-Ilja/sample, 
+    previewUri: /data/06-Ilja/sample_preview.jpg,
+    imageUri: /data/06-Ilja/sample_1024.jpg,
+    children:[]
+  }
+  

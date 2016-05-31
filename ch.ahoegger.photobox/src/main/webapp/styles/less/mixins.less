@@ -1,0 +1,72 @@
+.responsive-small(@rules) {
+  @media (max-width: 400px) {
+    @rules();
+  }
+}
+
+.responsive-medium(@rules) {
+  @media (min-width: 401px) and (max-width: 1000px) {
+    @rules();
+  }
+}
+
+.responsive-large(@rules) {
+  @media (min-width: 1001px) {
+    @rules();
+  }
+}
+.padding-horizontal-media(){
+  .responsive-large( {
+    padding-left: 20px;
+    padding-right: 20px;
+  });
+  .responsive-medium( {
+    padding-left: 5px;
+    padding-right: 5px;
+  });
+/*   .responsive-small( { */
+/*     margin: 20px; */
+/*   }); */
+}
+
+.padding-vertical-media(){
+  .responsive-large( {
+    padding-top: 20px;
+    padding-bottom: 20px;
+  });
+  .responsive-medium( {
+    padding-top: 5px;
+    padding-bottom: 5px;
+  });
+/*   .responsive-small( { */
+/*     margin: 20px; */
+/*   }); */
+}
+
+.margin-horizontal-media(){
+  .responsive-large( {
+    margin-left: 20px;
+    margin-right: 20px;
+  });
+  .responsive-medium( {
+    margin-left: 5px;
+    margin-right: 5px;
+  });
+/*   .responsive-small( { */
+/*     margin: 20px; */
+/*   }); */
+}
+
+.margin-vertical-media(){
+  .responsive-large( {
+    margin-top: 20px;
+    margin-bottom: 20px;
+  });
+  .responsive-medium( {
+    margin-top: 5px;
+    margin-bottom: 5px;
+  });
+/*   .responsive-small( { */
+/*     margin: 20px; */
+/*   }); */
+}

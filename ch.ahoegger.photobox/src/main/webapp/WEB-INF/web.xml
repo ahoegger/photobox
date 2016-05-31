@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+	id="WebApp_ID" version="3.1">
+
+	<display-name>Photobox</display-name>
+
+
+
+	<context-param>
+		<param-name>log4jConfiguration</param-name>
+		<param-value>log4j.xml</param-value>
+	</context-param>
+	<context-param>
+		<param-name>ch.ahoegger.picturebox.original-directory</param-name>
+		<param-value>D:/temp/max24h/webDev/photobook/original</param-value>
+	</context-param>
+	<context-param>
+		<param-name>ch.ahoegger.picturebox.working-directory</param-name>
+		<param-value>D:/temp/max24h/webDev/photobook/working</param-value>
+	</context-param>
+
+	<context-param>
+		<param-name>ch.ahoegger.picturebox.dbLocation</param-name>
+		<param-value>D:/private/webDev/db</param-value>
+	</context-param>
+
+	<!-- LISTENERS -->
+	<listener>
+		<listener-class>org.apache.logging.log4j.web.Log4jServletContextListener</listener-class>
+	</listener>
+	<listener>
+		<listener-class>ch.ahoegger.photobox.scale.ExecuterContext</listener-class>
+	</listener>
+	<listener>
+		<listener-class>ch.ahoegger.photobox.scale.ScaleDeamon</listener-class>
+	</listener>
+	<!-- SERVLETS -->
+	<servlet>
+		<servlet-name>static</servlet-name>
+		<servlet-class>org.apache.catalina.servlets.DefaultServlet</servlet-class>
+		<init-param>
+			<param-name>debug</param-name>
+			<param-value>1</param-value>
+		</init-param>
+		<init-param>
+			<param-name>listings</param-name>
+			<param-value>false</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+
+	<!-- <servlet> -->
+	<!-- <servlet-name>pictureServlet</servlet-name> -->
+	<!-- <servlet-class>ch.ahoegger.photobox.servlet.PictureServlet</servlet-class> -->
+	<!-- <init-param> -->
+	<!-- <param-name>workingDirectory</param-name> -->
+	<!-- <param-value>D:/temp/max24h/webDev/picturesWorking</param-value> -->
+	<!-- </init-param> -->
+	<!-- <init-param> -->
+	<!-- <param-name>pictureDirectory</param-name> -->
+	<!-- <param-value>D:/temp/max24h/webDev/pictures</param-value> -->
+	<!-- </init-param> -->
+	<!-- </servlet> -->
+	<!-- <servlet-mapping> -->
+	<!-- <servlet-name>pictureServlet</servlet-name> -->
+	<!-- <url-pattern>/pictures/*</url-pattern> -->
+	<!-- </servlet-mapping> -->
+
+	<servlet>
+		<servlet-name>ch.ahoegger.photobox.rest.PhotobookApplication</servlet-name>
+		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+<!-- 		<servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class> -->
+		<init-param>
+			<param-name>javax.ws.rs.Application</param-name>
+			<param-value>ch.ahoegger.photobox.rest.PhotobookApplication</param-value>
+		</init-param>
+		<init-param>
+			<param-name>ch.ahoegger.pictureDirectory</param-name>
+			<param-value>D:/temp/max24h/webDev/photobook/original</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>ch.ahoegger.photobox.rest.PhotobookApplication</servlet-name>
+		<url-pattern>/rest/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>static</servlet-name>
+		<url-pattern>/client/*</url-pattern>
+	</servlet-mapping>
+
+
+
+
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+	</welcome-file-list>
+</web-app>

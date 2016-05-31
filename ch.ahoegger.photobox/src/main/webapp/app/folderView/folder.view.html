@@ -1,0 +1,24 @@
+
+<h2 ng-if="folderViewController.folder.parent"
+	ng-click="folderViewController.navigateParent()"
+	class="back-navigation clickable">
+	<i class="fa fa-arrow-left" aria-hidden="true">{{folderViewController.folder.parent.name}}</i>
+</h2>
+<div class="folders">
+	<photobox-folder-preview class="clickable"
+		data-ng-repeat="folder in folderViewController.folder.subFolders"
+		ng-click="folderViewController.onFolderSelection(folder)"
+		folder="folder"> </photobox-folder-preview>
+</div>
+<!-- <div ng-repeat="folder in folderViewController.directories" -->
+<!--    ng-click="folderViewController.onFolderSelection(folder)"> -->
+<!-- 	{{folder.name}}</div> -->
+<div class="images">
+	<photobox-image-preview
+		ng-repeat="image in folderViewController.folder.pictures"
+		image-src="{{image.links | imageLinkFilter:'Preview'}}" image="image"
+		image-selection=folderViewController.onImageSelection></photobox-image-preview>
+	<!-- 	<img ng-repeat="image in folderViewController.files" -->
+	<!-- 		ng-src="rest/image?path={{image.path}}" class="img-preview"></img> </a> -->
+
+</div>

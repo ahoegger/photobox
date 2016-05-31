@@ -1,0 +1,269 @@
+(function(angular) {
+
+  'use strict';
+
+  var _name = 'photoboxImageSwipe';
+
+  angular.module('modulePictureboxComponents').directive(_name, SwipeDirective);
+
+  function SwipeDirective($timeout, window, $document, $compile, $filter) {
+    return {
+    restrict : 'E',
+    replace : false,
+    templateUrl : 'app/components/imageView/swipe/imageSwipeTemplate.html',
+    scope : {
+    files : '=',
+    index : '@',
+    imageSelection : '=?',
+    indexUpdated : '=?',
+    debounce : '@?'
+    },
+    link : function($scope, $element, $attrs) {
+      var $window;
+      var $container;
+      var $images = [];
+      var $currentImage;
+      var currentIndex;
+      var debouncePromise;
+      var debounce = $scope.debounce || 200;
+      var linkFilter = $filter('imageLinkFilter');
+      var onResize = _updatePositionsDebounced.bind(this);
+
+      (function _init() {
+        currentIndex = parseInt($scope.index);
+        $window = angular.element(window);
+        $container = angular.element($element[0].getElementsByClassName('swipe-container'));
+
+        // var imageSrc=linkFilter($scope.files[$scope.index], 'Desktop');
+        // $image02[0].setAttribute('image-src', imageSrc);
+        _updateImages();
+        // listeners
+        if ($scope.imageSelection) {
+          $scope.clickCallback = function(event) {
+            $scope.imageSelection(event);
+          }
+        }
+        $scope.$watch('files', function(newFiles) {
+          console.log('files changed: ', newFiles);
+          _updateImages();
+        });
+        $window.on('resize', onResize);
+        $element.on('destroy', function(){
+          $window.off('resize', onResize)
+        });
+
+      })();
+      
+
+      function _updateImages() {
+        var files = $scope.files;
+        var source;
+        if (angular.isDefined($scope.index) && files) {
+          // create images
+          var i;
+          var left = -100;
+          for (i = -1; i < 2; i++) {
+            if (i + currentIndex >= 0 && i + currentIndex < files.length) {
+              source = '<photobox-image-view  image-selection="clickCallback"  image-id="' + $scope.files[i + currentIndex].id + '" rotation="'+$scope.files[i + currentIndex].rotation+'"></photobox-image-view>';
+//              source = '<photobox-image-view  image-selection="clickCallback"  image-src="' + linkFilter($scope.files[i + currentIndex].links, 'Desktop') + '"></photobox-image-view>';
+              $images[i + 1] = $compile(source)($scope);
+              $images[i + 1].appendTo($container[0]);
+
+            }
+            left += 100;
+          }
+          _updatePositions(0);
+          _setCurrentImage($images[1]);
+        }
+      }
+
+      function _setCurrentImage($image) {
+        if ($currentImage) {
+          _removeDragListener($currentImage);
+        }
+        $currentImage = $image;
+        _addDragListeners($currentImage);
+      }
+
+      function _updatePositionsDebounced(deltaX){
+        if(debouncePromise){
+        $timeout.cancel(debouncePromise)
+        debouncePromise = undefined;
+        }
+        debouncePromise = $timeout(function(){
+          _updatePositions(deltaX);
+        }, debounce);
+      }
+      
+      function _updatePositions(deltaXRaw) {
+        var elementWidth = $container[0].getBoundingClientRect().width;
+        var deltaX = Math.min(Math.abs(deltaXRaw), elementWidth) * Math.sign(deltaXRaw);
+        var index = -1;
+        var i ;
+        for (i = -1; i < 2; i++) {
+          if($images[i+1]){
+            $images[i+1].css('left', ((i * elementWidth) + deltaX) + 'px');
+          }
+        }
+      }
+
+      function _snapPrevious() {
+        if(currentIndex <= 0){
+          _updatePositions(0);
+          return;
+        }
+        // update index
+        currentIndex--;
+        // remove last
+        if ($images[2]) {
+          $images[2].remove();
+        }
+        // shift
+        $images[2] = $images[1];
+        $images[1] = $images[0]
+        // create new
+        if (currentIndex > 0) {
+          $images[0] = _createImageView(currentIndex - 1);
+        } else {
+          $images[0] = undefined;
+        }
+        _updatePositions(0);
+        _setCurrentImage($images[1]);
+        _notifyIndexUpdated(currentIndex);
+      }
+
+      function _snapNext() {
+        if(currentIndex >= $scope.files.length-1){
+          _updatePositions(0);
+          return;
+        }
+        // update index
+        currentIndex++;
+        // remove last
+        if ($images[0]) {
+          $images[0].remove();
+        }
+        // shift
+        $images[0] = $images[1];
+        $images[1] = $images[2]
+        // create new
+        if ($scope.files.length > (currentIndex + 1)) {
+          $images[2] = _createImageView(currentIndex + 1, true);
+        } else {
+          $images[2] = undefined;
+        }
+        _updatePositions(0);
+        _setCurrentImage($images[1]);
+        _notifyIndexUpdated(currentIndex);
+      }
+
+      function _createImageView(fileIndex, append) {
+        var source = '<photobox-image-view  image-selection="clickCallback"  image-id="' + $scope.files[fileIndex].id + '" rotation="'+$scope.files[fileIndex].rotation+'"></photobox-image-view>';
+//        var source = '<photobox-image-view  image-selection="clickCallback"  image-src="' + linkFilter($scope.files[fileIndex].links, 'Desktop') + '"></photobox-image-view>';
+        var $image = $compile(source)($scope);
+        if (append) {
+          $image.appendTo($container[0]);
+        } else {
+          $image.prependTo($container[0]);
+        }
+        return $image;
+      }
+      
+      function _notifyIndexUpdated(index){
+        if($scope.indexUpdated){
+          $scope.indexUpdated(index);
+        }
+      }
+
+      // drag support
+      var onTouchStart = _touchStart.bind(self);
+      var onMouseDown = _mouseDown.bind(self);
+      var swiping = false;
+      var swipeStartX;
+      var swipeCurrentX;
+      var onMouseMove = _mouseMove.bind(self);
+      var onTouchMove = _touchMove.bind(self);
+      var onMoveEnd = _moveEnd.bind(self);
+
+      function _addDragListeners($image) {
+        $image.on('mousedown', onMouseDown);
+        $image.on('touchstart', onTouchStart);
+      }
+
+      function _removeDragListener($image) {
+        $image.off('mousedown', onMouseDown);
+        $image.off('touchstart', onTouchStart);
+      }
+
+      function _touchStart(event) {
+        var touch = event.originalEvent.touches[0];
+        _dragStart(touch.pageX);
+      }
+      function _mouseDown(event) {
+        _dragStart(event.pageX);
+      }
+      function _dragStart(xPosition) {
+        if (swiping) {
+          return;
+        }
+        $container.removeClass('animated');
+        swipeStartX = xPosition;
+        console.log('dragStart');
+        $document.on('mousemove', onMouseMove);
+        $document.on('touchmove', onTouchMove);
+        $document.on('mouseup touchend', onMoveEnd);
+        swiping = true;
+      }
+
+      function _mouseMove(event) {
+        _move(event.pageX);
+      }
+      function _touchMove(event) {
+        var touch = event.originalEvent.touches[0];
+        _move(touch.pageX);
+
+      }
+      function _move(xPosition) {
+        swipeCurrentX = xPosition;
+        var deltaX = swipeCurrentX - swipeStartX;
+        if (deltaX < 0 && $images[2]) {
+          _updatePositions(deltaX);
+        } else if (deltaX > 0 && $images[0]) {
+          _updatePositions(deltaX);
+        }
+        console.log('moved: ', xPosition, swipeStartX);
+      }
+      function _moveEnd(event) {
+        if (angular.isUndefined(swipeCurrentX) || angular.isUndefined(swipeStartX)) {
+          return;
+        }
+        var deltaX = swipeCurrentX - swipeStartX;
+        swipeCurrentX = undefined;
+        swipeStartX = undefined;
+        $document.off('mousemove', onMouseMove);
+        $document.off('touchmove', onTouchMove);
+        $document.off('mouseup touchend', onMoveEnd);
+        $container.addClass('animated');
+        swiping = false;
+        _snap(deltaX);
+      }
+
+      function _snap(deltaX) {
+        var elementWidth = $container[0].getBoundingClientRect().width;
+        if (Math.abs(deltaX) > elementWidth * 0.30) {
+          if (deltaX > 0) {
+            _snapPrevious();
+          } else {
+            _snapNext();
+          }
+        } else {
+          _updatePositions(0);
+        }
+      }
+
+    }
+    };
+  }
+  SwipeDirective.$inject = [ '$timeout', '$window', '$document', '$compile', '$filter' ];
+
+})(angular);

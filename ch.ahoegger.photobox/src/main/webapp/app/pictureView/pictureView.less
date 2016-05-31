@@ -1,0 +1,53 @@
+#picturebox-picture-view {
+  height: 100vh;
+  transition: background-color @animation-duration-medium ease-out;
+    
+  >.navigation{
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: @background-color-navigation-mobile;
+    border-bottom: solid 1px @border-color-navigation;
+    font-size: medium;
+    .padding-horizontal-media();
+    .padding-vertical-media();    
+
+    &.ng-enter {
+      transition:@animation-duration-medium ease-out all;
+      opacity:0;
+    }
+    
+    &.ng-enter.ng-enter-active {
+      opacity:1;
+    }
+    &.ng-leave {
+  	  transition:@animation-duration-medium ease-out all;
+      opacity:1;
+    }
+    &.ng-leave.ng-leave-active {
+      opacity:0;
+    }
+    
+    > i:before{
+      padding-left: 5px;
+    }
+    
+  }
+  
+  >photobox-image-view{
+    height: 100%;
+    width: 100%;
+  }
+  >photobox-image-swipe{
+    height: 100%;
+    width: 100%;
+  }
+  
+  
+  &.full-screen {
+    background-color: @background-color-picture-view-full-screen;
+
+  }
+	
+}
