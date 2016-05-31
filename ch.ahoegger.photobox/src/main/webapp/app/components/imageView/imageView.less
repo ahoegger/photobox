@@ -4,6 +4,9 @@ photobox-image-view {
   
   > img{
     position: absolute;
-/*     width: 100%; */
+    &.animated{
+      transition: all @animation-duration-medium ease-out;
+    }
+    
   }
 }

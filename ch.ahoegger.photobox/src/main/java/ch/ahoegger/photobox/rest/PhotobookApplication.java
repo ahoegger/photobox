@@ -24,6 +24,10 @@ public class PhotobookApplication extends ResourceConfig {
     packages("ch.ahoegger.photobox.rest");
     System.out.println("APP START");
     register(JsonProcessingFeature.class);
+
+//    register(MyObjectMapperProvider.class) // No need to register this provider if no special configuration is required.
+//        .register(JacksonFeature.class);
+
     property(JsonGenerator.PRETTY_PRINTING, true);
   }
 

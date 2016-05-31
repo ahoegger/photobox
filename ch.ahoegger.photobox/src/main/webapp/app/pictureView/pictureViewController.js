@@ -44,17 +44,27 @@
       $state.go('folderState', {
         id : self.folder.id
       });
-    }
+    };
     self.handleImgClick = function(){
       console.log('toggle fullscreen');
       self.fullScreen = !self.fullScreen;
-    }
+    };
     self.handleIndexUpdated = function(index){
       console.log('index updated!',index);
       self.index = index;
       self.image = self.folder.pictures[self.index];
       $location.search('index', index)
-    }
+    };
+    self.handleRotateLeft = function(){
+      self.folder.pictures[self.index].rotation -= 90;
+    };
+    self.handleRotateRight = function(){
+      self.folder.pictures[self.index].rotation +=90;
+      // TODO backend call
+    };
+    self.handleHide= function(){
+      
+    };
   }
   
   Controller.$inject = [ '$state', '$stateParams', '$location','resource.service' ]

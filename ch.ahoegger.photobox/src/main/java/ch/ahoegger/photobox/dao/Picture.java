@@ -12,13 +12,9 @@ public class Picture implements Serializable {
   private long m_folderId;
   private int m_rotation;
   private boolean m_active;
-//  @JsonIgnore
   private String m_pathOrignal;
-//  @JsonIgnore
   private String m_pathSmall;
-//  @JsonIgnore
   private String m_pathMedium;
-//  @JsonIgnore
   private String m_pathLarge;
 
   public long getId() {

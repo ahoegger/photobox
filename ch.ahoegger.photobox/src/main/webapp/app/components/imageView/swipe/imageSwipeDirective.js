@@ -27,7 +27,9 @@
       var debouncePromise;
       var debounce = $scope.debounce || 200;
       var linkFilter = $filter('imageLinkFilter');
-      var onResize = _updatePositionsDebounced.bind(this);
+      var onResize = function(){
+        _updatePositionsDebounced();
+      }.bind(this);
 
       (function _init() {
         currentIndex = parseInt($scope.index);
@@ -48,12 +50,11 @@
           _updateImages();
         });
         $window.on('resize', onResize);
-        $element.on('destroy', function(){
+        $element.on('destroy', function() {
           $window.off('resize', onResize)
         });
 
       })();
-      
 
       function _updateImages() {
         var files = $scope.files;
@@ -64,8 +65,10 @@
           var left = -100;
           for (i = -1; i < 2; i++) {
             if (i + currentIndex >= 0 && i + currentIndex < files.length) {
-              source = '<photobox-image-view  image-selection="clickCallback"  image-id="' + $scope.files[i + currentIndex].id + '" rotation="'+$scope.files[i + currentIndex].rotation+'"></photobox-image-view>';
-//              source = '<photobox-image-view  image-selection="clickCallback"  image-src="' + linkFilter($scope.files[i + currentIndex].links, 'Desktop') + '"></photobox-image-view>';
+              source = '<photobox-image-view  image-selection="clickCallback"  image-id="' + $scope.files[i + currentIndex].id + '" rotation="files[' +( i + currentIndex )+ '].rotation"></photobox-image-view>';
+              // source = '<photobox-image-view image-selection="clickCallback"
+              // image-src="' + linkFilter($scope.files[i + currentIndex].links,
+              // 'Desktop') + '"></photobox-image-view>';
               $images[i + 1] = $compile(source)($scope);
               $images[i + 1].appendTo($container[0]);
 
@@ -85,30 +88,34 @@
         _addDragListeners($currentImage);
       }
 
-      function _updatePositionsDebounced(deltaX){
-        if(debouncePromise){
-        $timeout.cancel(debouncePromise)
-        debouncePromise = undefined;
+      function _updatePositionsDebounced(deltaX) {
+        console.log('debounced update positions...');
+        if (debouncePromise) {
+          $timeout.cancel(debouncePromise)
+          debouncePromise = undefined;
         }
-        debouncePromise = $timeout(function(){
+        debouncePromise = $timeout(function() {
           _updatePositions(deltaX);
         }, debounce);
       }
-      
+
       function _updatePositions(deltaXRaw) {
         var elementWidth = $container[0].getBoundingClientRect().width;
-        var deltaX = Math.min(Math.abs(deltaXRaw), elementWidth) * Math.sign(deltaXRaw);
+        console.log('update positions: '+elementWidth);
+        var deltaX = deltaXRaw || 0;
+        deltaX = Math.min(Math.abs(deltaX), elementWidth) * Math.sign(deltaX);
         var index = -1;
-        var i ;
+        var i;
         for (i = -1; i < 2; i++) {
-          if($images[i+1]){
-            $images[i+1].css('left', ((i * elementWidth) + deltaX) + 'px');
+          if ($images[i + 1]) {
+            $images[i + 1].css('left', ((i * elementWidth) + deltaX) + 'px');
+            console.log('css img '+(i+1)+' = '+((i * elementWidth) + deltaX) + 'px');
           }
         }
       }
 
       function _snapPrevious() {
-        if(currentIndex <= 0){
+        if (currentIndex <= 0) {
           _updatePositions(0);
           return;
         }
@@ -133,7 +140,7 @@
       }
 
       function _snapNext() {
-        if(currentIndex >= $scope.files.length-1){
+        if (currentIndex >= $scope.files.length - 1) {
           _updatePositions(0);
           return;
         }
@@ -158,8 +165,10 @@
       }
 
       function _createImageView(fileIndex, append) {
-        var source = '<photobox-image-view  image-selection="clickCallback"  image-id="' + $scope.files[fileIndex].id + '" rotation="'+$scope.files[fileIndex].rotation+'"></photobox-image-view>';
-//        var source = '<photobox-image-view  image-selection="clickCallback"  image-src="' + linkFilter($scope.files[fileIndex].links, 'Desktop') + '"></photobox-image-view>';
+        var source = '<photobox-image-view  image-selection="clickCallback"  image-id="' + $scope.files[fileIndex].id + '" rotation="' + $scope.files[fileIndex].rotation + '"></photobox-image-view>';
+        // var source = '<photobox-image-view image-selection="clickCallback"
+        // image-src="' + linkFilter($scope.files[fileIndex].links, 'Desktop') +
+        // '"></photobox-image-view>';
         var $image = $compile(source)($scope);
         if (append) {
           $image.appendTo($container[0]);
@@ -168,9 +177,9 @@
         }
         return $image;
       }
-      
-      function _notifyIndexUpdated(index){
-        if($scope.indexUpdated){
+
+      function _notifyIndexUpdated(index) {
+        if ($scope.indexUpdated) {
           $scope.indexUpdated(index);
         }
       }
@@ -196,16 +205,23 @@
       }
 
       function _touchStart(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        console.log('touch start!!!');
         var touch = event.originalEvent.touches[0];
         _dragStart(touch.pageX);
       }
       function _mouseDown(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        console.log('mouse down!!!');
         _dragStart(event.pageX);
       }
       function _dragStart(xPosition) {
         if (swiping) {
           return;
         }
+        console.log('add listeners...');
         $container.removeClass('animated');
         swipeStartX = xPosition;
         console.log('dragStart');
@@ -216,9 +232,13 @@
       }
 
       function _mouseMove(event) {
+        event.preventDefault();
+        event.stopPropagation();
         _move(event.pageX);
       }
       function _touchMove(event) {
+        event.preventDefault();
+        event.stopPropagation();
         var touch = event.originalEvent.touches[0];
         _move(touch.pageX);
 
@@ -234,17 +254,25 @@
         console.log('moved: ', xPosition, swipeStartX);
       }
       function _moveEnd(event) {
-        if (angular.isUndefined(swipeCurrentX) || angular.isUndefined(swipeStartX)) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (!swiping) {
           return;
         }
-        var deltaX = swipeCurrentX - swipeStartX;
-        swipeCurrentX = undefined;
-        swipeStartX = undefined;
+        console.log('move end!!! remove listeners')
         $document.off('mousemove', onMouseMove);
         $document.off('touchmove', onTouchMove);
         $document.off('mouseup touchend', onMoveEnd);
         $container.addClass('animated');
         swiping = false;
+        var deltaX;
+        if (angular.isUndefined(swipeCurrentX)) {
+          swipeCurrentX = swipeStartX;
+        }
+
+        deltaX = swipeCurrentX - swipeStartX;
+        swipeCurrentX = undefined;
+        swipeStartX = undefined;
         _snap(deltaX);
       }
 
@@ -258,6 +286,12 @@
           }
         } else {
           _updatePositions(0);
+          if (Math.abs(deltaX) < 10) {
+            console.log('img selection ' + $scope.files[currentIndex]);
+            $scope.$apply(function() {
+              $scope.imageSelection($scope.files[currentIndex]);
+            });
+          }
         }
       }
 

@@ -23,3 +23,57 @@ body {
 .clickable{
 	cursor: pointer;
 }
+
+.navigation{
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: @background-color-navigation-mobile;
+  border-bottom: solid 1px @border-color-navigation;
+  font-size: medium;
+  padding-left: 5px;
+  padding-right: 5px;
+  .padding-horizontal-media();
+  .padding-vertical-media();
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;    
+
+  .responsive-small({
+    font-size: small;
+  });
+  
+
+  &.ng-enter {
+    transition:@animation-duration-medium ease-out all;
+    opacity:0;
+  }
+  
+  &.ng-enter.ng-enter-active {
+    opacity:1;
+  }
+  &.ng-leave {
+	  transition:@animation-duration-medium ease-out all;
+    opacity:1;
+  }
+  &.ng-leave.ng-leave-active {
+    opacity:0;
+  }
+  
+  > .left {
+    flex: 0 0 auto;
+  }
+  > .center {
+    flex: 1 1 auto;
+    text-align: center;
+  }
+  > .right {
+    flex: 0 0 auto;
+  }
+  > i:before{
+    padding-left: 5px;
+  }
+  
+}
