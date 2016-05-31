@@ -3,10 +3,12 @@ package ch.ahoegger.photobox.rest;
 import java.io.File;
 
 import javax.annotation.PostConstruct;
+import javax.json.stream.JsonGenerator;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Context;
 
+import org.glassfish.jersey.jsonp.JsonProcessingFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 
 import ch.ahoegger.photobox.db.DbAccess;
@@ -21,6 +23,8 @@ public class PhotobookApplication extends ResourceConfig {
   public PhotobookApplication() {
     packages("ch.ahoegger.photobox.rest");
     System.out.println("APP START");
+    register(JsonProcessingFeature.class);
+    property(JsonGenerator.PRETTY_PRINTING, true);
   }
 
   @PostConstruct

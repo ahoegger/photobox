@@ -23,7 +23,7 @@
 
 	<context-param>
 		<param-name>ch.ahoegger.picturebox.dbLocation</param-name>
-		<param-value>D:/private/webDev/db</param-value>
+		<param-value>E:/workspaces/private/photobox/db</param-value>
 	</context-param>
 
 	<!-- LISTENERS -->
