@@ -25,7 +25,15 @@
 		<param-name>ch.ahoegger.picturebox.dbLocation</param-name>
 		<param-value>E:/workspaces/private/photobox/db</param-value>
 	</context-param>
-
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>photobox</web-resource-name>
+			<url-pattern>/*</url-pattern>
+		</web-resource-collection>
+		<user-data-constraint>
+			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
+		</user-data-constraint>
+	</security-constraint>
 	<!-- LISTENERS -->
 	<listener>
 		<listener-class>org.apache.logging.log4j.web.Log4jServletContextListener</listener-class>
@@ -72,7 +80,7 @@
 	<servlet>
 		<servlet-name>ch.ahoegger.photobox.rest.PhotobookApplication</servlet-name>
 		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
-<!-- 		<servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class> -->
+		<!-- <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class> -->
 		<init-param>
 			<param-name>javax.ws.rs.Application</param-name>
 			<param-value>ch.ahoegger.photobox.rest.PhotobookApplication</param-value>
