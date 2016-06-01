@@ -23,17 +23,17 @@
       var fit = true;
       var debouncePromise;
       var debounce = $scope.debounce || 200;
+      var originalImageSize;
       var onWindowResize = function(){
         console.log('['+$scope.imageId+']: resized!!!');
         _debouncedLayoutImage();
       }.bind(this);
-      var originalImageSize;
 
       (function _init() {
         $image = angular.element($element[0].getElementsByTagName('img'));
         $window = angular.element(window);
 
-        $scope.imageSrc = $filter('imageSizeFilter')($scope.imageId, $element[0].getBoundingClientRect().width);
+        $scope.imageSrc = $filter('imageSizeFilter')($scope.imageId, $element[0].getBoundingClientRect());
 
         // listeners
         $scope.$watch('rotation', function(newVal) {
@@ -62,8 +62,8 @@
           },100);
 
         });
-        $window.bind('resize', onWindowResize);
 
+        $window.bind('resize', onWindowResize);
         $scope.$on('$destroy', function() {
           $window.unbind('resize', onWindowResize);
         });
@@ -138,6 +138,7 @@
         }
         $image.css(css);
       }
+      
     }
     };
   }

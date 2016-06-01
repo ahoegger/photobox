@@ -68,8 +68,13 @@
           id : img.id, 
           active : false
       };
+      self.folder.pictures = self.folder.pictures.filter(function(picture, index){
+        return picture.id !== img.id;
+      });
       resourceService.postImage(updateImg);
     };
+    
+
   }
   
   Controller.$inject = [ '$state', '$stateParams', '$location','resource.service' ]

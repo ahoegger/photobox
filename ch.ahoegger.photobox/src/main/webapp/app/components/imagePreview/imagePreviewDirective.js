@@ -29,7 +29,7 @@
         $imageContainer = angular.element($element[0].getElementsByClassName('img-preview-container'));
         $image = angular.element($element[0].getElementsByClassName('img-preview'));
         $window = angular.element(window);
-        $scope.imageUrl = $filter('imageSizeFilter')($scope.image.id, $element[0].getBoundingClientRect().width);
+        $scope.imageUrl = $filter('imageSizeFilter')($scope.image.id, $element[0].getBoundingClientRect());
         if ($scope.imageSelection) {
           $scope.clickCallback = function(event) {
             console.log('clicked!!!');

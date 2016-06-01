@@ -2,9 +2,11 @@
 	ng-class="{'full-screen' : pictureViewController.fullScreen}">
 
 	<photobox-image-swipe files="pictureViewController.folder.pictures"
-		index="{{pictureViewController.index}}"
+		index="pictureViewController.index"
 		image-selection="pictureViewController.handleImgClick"
-		index-updated="pictureViewController.handleIndexUpdated">
+		index-updated="pictureViewController.handleIndexUpdated"
+		rotate-left="pictureViewController.handleRotateLeft"
+		rotate-right="pictureViewController.handleRotateRight">
 	</photobox-image-swipe>
 
 	<div class="navigation" ng-if="!pictureViewController.fullScreen")>

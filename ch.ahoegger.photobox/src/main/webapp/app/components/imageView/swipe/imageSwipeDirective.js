@@ -13,9 +13,11 @@
     templateUrl : 'app/components/imageView/swipe/imageSwipeTemplate.html',
     scope : {
     files : '=',
-    index : '@',
+    index : '=',
     imageSelection : '=?',
     indexUpdated : '=?',
+    rotateLeft : '=?',
+    rotateRight : '=?',
     debounce : '@?'
     },
     link : function($scope, $element, $attrs) {
@@ -25,11 +27,13 @@
       var $currentImage;
       var currentIndex;
       var debouncePromise;
+      var debouncePromiseUpdateImages;
       var debounce = $scope.debounce || 200;
       var linkFilter = $filter('imageLinkFilter');
       var onResize = function() {
         _updatePositionsDebounced();
       }.bind(this);
+      var onKeyDown = _handleKeyDown.bind(this);
 
       (function _init() {
         currentIndex = parseInt($scope.index);
@@ -38,8 +42,9 @@
 
         // var imageSrc=linkFilter($scope.files[$scope.index], 'Desktop');
         // $image02[0].setAttribute('image-src', imageSrc);
-        _updateImages();
+        _initialUpdateImagesDebounced();
         // listeners
+
         if ($scope.imageSelection) {
           $scope.clickCallback = function(event) {
             $scope.imageSelection(event);
@@ -47,17 +52,64 @@
         }
         $scope.$watch('files', function(newFiles) {
           console.log('files changed: ', newFiles);
-          _updateImages();
+          _initialUpdateImagesDebounced();
         });
+        $scope.$watch('index', function(newIndexRaw) {
+          console.log('index changed: ', newIndexRaw);
+          var newIndex = undefined;
+          if (angular.isDefined(newIndexRaw)) {
+            newIndex = parseInt(newIndexRaw);
+          }
+          if (currentIndex !== newIndex) {
+            _initialUpdateImagesDebounced();
+          }
+        });
+        $window.on('keyup', onKeyDown);
         $window.on('resize', onResize);
         $element.on('destroy', function() {
           $window.off('resize', onResize)
+          $window.off('keyup', onKeyDown);
         });
 
       })();
 
+      function _initialUpdateImagesDebounced() {
+        $container.removeClass('animated');
+        _updateImagesDebounced().then(function() {
+          $container.addClass('animated');
+        });
+      }
+
+      function _updateImagesDebounced() {
+        if (debouncePromiseUpdateImages) {
+          $timeout.cancel(debouncePromiseUpdateImages);
+          debouncePromiseUpdateImages = undefined;
+        }
+        debouncePromiseUpdateImages = $timeout(function() {
+          _updateImages();
+          debouncePromiseUpdateImages = undefined;
+        }, debounce);
+        return debouncePromiseUpdateImages;
+      }
+
       function _updateImages() {
         var files = $scope.files;
+        if (!files || angular.isUndefined($scope.index)) {
+          return;
+        }
+        var newIndex = parseInt($scope.index);
+        newIndex = Math.min(files.length - 1, newIndex);
+        newIndex = Math.max(0, newIndex);
+        if (currentIndex !== newIndex) {
+          currentIndex = newIndex;
+          _notifyIndexUpdated(currentIndex);
+        }
+        // remove old
+        $images.forEach(function($img) {
+          if ($img) {
+            $img.remove();
+          }
+        });
         var source;
         if (angular.isDefined($scope.index) && files) {
           // create images
@@ -65,7 +117,7 @@
           var left = -100;
           for (i = -1; i < 2; i++) {
             if (i + currentIndex >= 0 && i + currentIndex < files.length) {
-              source = '<photobox-image-view  image-selection="clickCallback"  image-id="' + $scope.files[i + currentIndex].id + '" rotation="files[' + (i + currentIndex) + '].rotation"></photobox-image-view>';
+              source = '<photobox-image-view ' + 'image-selection="clickCallback" ' + 'image-id="' + $scope.files[i + currentIndex].id + '" ' + 'rotation="files[' + (i + currentIndex) + '].rotation"' + '></photobox-image-view>';
               // source = '<photobox-image-view image-selection="clickCallback"
               // image-src="' + linkFilter($scope.files[i + currentIndex].links,
               // 'Desktop') + '"></photobox-image-view>';
@@ -111,7 +163,7 @@
         for (i = -1; i < 2; i++) {
           if ($images[i + 1]) {
             var left = (i * elementWidth) + deltaX;
-            var opacity = (elementWidth - Math.abs(left/1.5)) / elementWidth;
+            var opacity = (elementWidth - Math.abs(left / 1.5)) / elementWidth;
 
             $images[i + 1].css({
             left : left + 'px',
@@ -174,7 +226,7 @@
       }
 
       function _createImageView(fileIndex, append) {
-        var source = '<photobox-image-view  image-selection="clickCallback"  image-id="' + $scope.files[fileIndex].id + '" rotation="' + $scope.files[fileIndex].rotation + '"></photobox-image-view>';
+        var source = '<photobox-image-view  image-selection="clickCallback"  image-id="' + $scope.files[fileIndex].id + '" rotation="files[' + fileIndex + '].rotation"></photobox-image-view>';
         // var source = '<photobox-image-view image-selection="clickCallback"
         // image-src="' + linkFilter($scope.files[fileIndex].links, 'Desktop') +
         // '"></photobox-image-view>';
@@ -302,6 +354,34 @@
             });
           }
         }
+      }
+
+      function _handleKeyDown(event) {
+        if (event.shiftKey || event.altKey) {
+          return;
+        }
+        if (event.ctrlKey) {
+          if (event.keyCode === 37) {
+            if ($scope.rotateLeft) {
+              $scope.rotateLeft();
+              event.preventDefault();
+            }
+          } else if (event.keyCode === 39) {
+            if ($scope.rotateRight) {
+              $scope.rotateRight();
+              event.preventDefault();
+            }
+          }
+          return;
+        }
+        if (event.keyCode === 37) {
+          _snapPrevious();
+          event.preventDefault();
+        } else if (event.keyCode === 39) {
+          _snapNext();
+          event.preventDefault();
+        }
+
       }
 
     }
