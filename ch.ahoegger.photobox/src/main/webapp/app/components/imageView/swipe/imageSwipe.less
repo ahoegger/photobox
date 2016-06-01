@@ -13,11 +13,13 @@ photobox-image-swipe {
       position: absolute;
       height: 100%;
       width: 100%;
+
     }
     
     &.animated {
       > photobox-image-view {
-        transition: left @animation-duration-medium ease-out;
+        transition: left @animation-duration-medium ease-out,
+          opacity @animation-duration-medium ease-out;
       }
     }
   }

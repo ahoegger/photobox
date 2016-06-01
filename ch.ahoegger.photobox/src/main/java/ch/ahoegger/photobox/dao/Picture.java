@@ -3,15 +3,19 @@ package ch.ahoegger.photobox.dao;
 import java.io.Serializable;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Picture implements Serializable {
   private static final long serialVersionUID = 1L;
 
   private long m_id;
+
   private String m_name;
   private Date m_captureDate;
   private long m_folderId;
-  private int m_rotation;
-  private boolean m_active;
+  private Integer m_rotation;
+  private Boolean m_active;
   private String m_pathOrignal;
   private String m_pathSmall;
   private String m_pathMedium;
@@ -53,20 +57,20 @@ public class Picture implements Serializable {
     return this;
   }
 
-  public int getRotation() {
+  public Integer getRotation() {
     return m_rotation;
   }
 
-  public Picture withRotation(int rotation) {
+  public Picture withRotation(Integer rotation) {
     m_rotation = rotation;
     return this;
   }
 
-  public boolean isActive() {
+  public Boolean getActive() {
     return m_active;
   }
 
-  public Picture withActive(boolean active) {
+  public Picture withActive(Boolean active) {
     m_active = active;
     return this;
   }
@@ -107,4 +111,45 @@ public class Picture implements Serializable {
     m_pathLarge = pathLarge;
     return this;
   }
+
+  public void setId(long id) {
+    m_id = id;
+  }
+
+  public void setName(String name) {
+    m_name = name;
+  }
+
+  public void setCaptureDate(Date captureDate) {
+    m_captureDate = captureDate;
+  }
+
+  public void setFolderId(long folderId) {
+    m_folderId = folderId;
+  }
+
+  public void setRotation(Integer rotation) {
+    m_rotation = rotation;
+  }
+
+  public void setActive(Boolean active) {
+    m_active = active;
+  }
+
+  public void setPathOrignal(String pathOrignal) {
+    m_pathOrignal = pathOrignal;
+  }
+
+  public void setPathSmall(String pathSmall) {
+    m_pathSmall = pathSmall;
+  }
+
+  public void setPathMedium(String pathMedium) {
+    m_pathMedium = pathMedium;
+  }
+
+  public void setPathLarge(String pathLarge) {
+    m_pathLarge = pathLarge;
+  }
+
 }

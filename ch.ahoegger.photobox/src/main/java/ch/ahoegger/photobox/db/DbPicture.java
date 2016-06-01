@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import ch.ahoegger.photobox.dao.Picture;
 import ch.ahoegger.photobox.db.util.PreparedStatementExecuter;
@@ -37,7 +38,7 @@ public class DbPicture implements IDbPicture {
         statement.setString(parameterIndex++, p.getName());
         statement.setDate(parameterIndex++, SQL.toSqlDate(p.getCaptureDate()));
         statement.setInt(parameterIndex++, p.getRotation());
-        statement.setBoolean(parameterIndex++, p.isActive());
+        statement.setBoolean(parameterIndex++, p.getActive());
         statement.setString(parameterIndex++, p.getPathOrignal());
         statement.setString(parameterIndex++, p.getPathSmall());
         statement.setString(parameterIndex++, p.getPathMedium());
@@ -144,5 +145,45 @@ public class DbPicture implements IDbPicture {
         .withPathOrignal(res.getString(COL_PATH_ORIGINAL))
         .withPathSmall(res.getString(COL_PATH_SMALL))
         .withRotation(res.getInt(COL_ROTATION));
+  }
+
+  public static Picture update(Picture picture) {
+
+    new PreparedStatementExecuter<Void>() {
+      @Override
+      protected String getStatement() {
+        List<String> updateValues = new ArrayList<String>();
+        if (picture.getRotation() != null) {
+          updateValues.add(String.format("%s = ?", COL_ROTATION));
+        }
+        if (picture.getActive() != null) {
+          updateValues.add(String.format("%s = ?", COL_ACTIVE));
+        }
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder
+            .append("UPDATE ").append(TABLE_NAME)
+            .append(" SET ");
+        sqlBuilder.append(updateValues.stream().collect(Collectors.joining(" ,")));
+        sqlBuilder.append(" WHERE ")
+            .append(COL_ID).append(" = ?");
+        return sqlBuilder.toString();
+      }
+
+      @Override
+      protected Void bindAndExecute(Connection connection, PreparedStatement statement) throws SQLException {
+        int parameterIndex = 1;
+        if (picture.getRotation() != null) {
+          statement.setInt(parameterIndex++, picture.getRotation().intValue());
+        }
+        if (picture.getActive() != null) {
+          statement.setBoolean(parameterIndex++, picture.getActive().booleanValue());
+        }
+
+        statement.setLong(parameterIndex++, picture.getId());
+        statement.execute();
+        return null;
+      }
+    }.execute();
+    return findById(picture.getId());
   }
 }

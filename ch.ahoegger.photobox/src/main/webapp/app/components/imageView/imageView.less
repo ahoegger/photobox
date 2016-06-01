@@ -4,8 +4,10 @@ photobox-image-view {
   
   > img{
     position: absolute;
+    opacity: 0;
     &.animated{
       transition: all @animation-duration-medium ease-out;
+      opacity: 1;
     }
     
   }

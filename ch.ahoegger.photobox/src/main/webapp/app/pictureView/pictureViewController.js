@@ -23,17 +23,6 @@
       resourceService.getFolder($stateParams.folderId).then(function(response) {
         self.folder = response;
         self.image = self.folder.pictures[self.index];
-//        self.hasParent = response.path || false;
-//        self.parentFolderText = response.path;
-        
-//        self.files = response.children.filter(function(res) {
-//          return !res.folder;
-//        }).map(function(res) {
-//          return res;
-//        });
-        
-//        self.image = self.files[self.index];
-        
       });
      
     
@@ -56,14 +45,30 @@
       $location.search('index', index)
     };
     self.handleRotateLeft = function(){
-      self.folder.pictures[self.index].rotation -= 90;
+      var img = self.folder.pictures[self.index];
+      var updateImg = {
+          id : img.id,
+          rotation: self.folder.pictures[self.index].rotation - 90
+      };
+      img.rotation = updateImg.rotation;
+      resourceService.postImage(updateImg);
     };
     self.handleRotateRight = function(){
-      self.folder.pictures[self.index].rotation +=90;
-      // TODO backend call
+      var img = self.folder.pictures[self.index];
+      var updateImg = {
+          id : img.id,
+          rotation: img.rotation + 90
+      };
+      img.rotation = updateImg.rotation;
+      resourceService.postImage(updateImg);
     };
     self.handleHide= function(){
-      
+      var img = self.folder.pictures[self.index];
+      var updateImg = {
+          id : img.id, 
+          active : false
+      };
+      resourceService.postImage(updateImg);
     };
   }
   

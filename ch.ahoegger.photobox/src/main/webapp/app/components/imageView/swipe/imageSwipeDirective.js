@@ -27,7 +27,7 @@
       var debouncePromise;
       var debounce = $scope.debounce || 200;
       var linkFilter = $filter('imageLinkFilter');
-      var onResize = function(){
+      var onResize = function() {
         _updatePositionsDebounced();
       }.bind(this);
 
@@ -65,7 +65,7 @@
           var left = -100;
           for (i = -1; i < 2; i++) {
             if (i + currentIndex >= 0 && i + currentIndex < files.length) {
-              source = '<photobox-image-view  image-selection="clickCallback"  image-id="' + $scope.files[i + currentIndex].id + '" rotation="files[' +( i + currentIndex )+ '].rotation"></photobox-image-view>';
+              source = '<photobox-image-view  image-selection="clickCallback"  image-id="' + $scope.files[i + currentIndex].id + '" rotation="files[' + (i + currentIndex) + '].rotation"></photobox-image-view>';
               // source = '<photobox-image-view image-selection="clickCallback"
               // image-src="' + linkFilter($scope.files[i + currentIndex].links,
               // 'Desktop') + '"></photobox-image-view>';
@@ -83,8 +83,10 @@
       function _setCurrentImage($image) {
         if ($currentImage) {
           _removeDragListener($currentImage);
+          $currentImage.removeClass('current');
         }
         $currentImage = $image;
+        $image.addClass('current');
         _addDragListeners($currentImage);
       }
 
@@ -101,17 +103,24 @@
 
       function _updatePositions(deltaXRaw) {
         var elementWidth = $container[0].getBoundingClientRect().width;
-        console.log('update positions: '+elementWidth);
+        console.log('update positions: ' + elementWidth);
         var deltaX = deltaXRaw || 0;
         deltaX = Math.min(Math.abs(deltaX), elementWidth) * Math.sign(deltaX);
         var index = -1;
         var i;
         for (i = -1; i < 2; i++) {
           if ($images[i + 1]) {
-            $images[i + 1].css('left', ((i * elementWidth) + deltaX) + 'px');
-            console.log('css img '+(i+1)+' = '+((i * elementWidth) + deltaX) + 'px');
+            var left = (i * elementWidth) + deltaX;
+            var opacity = (elementWidth - Math.abs(left/1.5)) / elementWidth;
+
+            $images[i + 1].css({
+            left : left + 'px',
+            opacity : opacity + ''
+            });
+            console.log('css img ' + (i + 1) + ' = ' + ((i * elementWidth) + deltaX) + 'px');
           }
         }
+
       }
 
       function _snapPrevious() {

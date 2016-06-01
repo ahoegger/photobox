@@ -48,10 +48,31 @@
         });
         return deferred.promise;
       }
+      
+      var postImage = function(image){
+        var url = 'rest/photo/';
+          url +=image.id;
+        console.log('call postImage for '+url+'.');
+        var deferred = $q.defer();
+        $http.post(url, image,
+            {
+                headers: {'Accept': GLOBAL_JSON_TYPE},
+                timeout: GLOBAL_TIMEOUT
+            }
+        )
+        .then(function(result){
+          deferred.resolve(result.data);
+        },
+        function(error){
+          deferred.resolve(undefined);
+        });
+        return deferred.promise;
+      }
 
       return {
           getResources: getResourcesInternal,
-          getFolder: getFolder
+          getFolder: getFolder,
+          postImage : postImage
       };
     }
     ResourceService.$inject = ['$http', '$q'];
