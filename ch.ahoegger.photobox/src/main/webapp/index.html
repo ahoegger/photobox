@@ -16,7 +16,7 @@
 <!-- endbuild -->
 <!-- endbuild -->
 </head>
-<body ng-app="photoboxApp">
+<body ng-app="module.picturebox">
 	<!-- <body> -->
 	<!--[if lt IE 7]>
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
@@ -24,7 +24,9 @@
 
 	<!-- Add your site or application content here -->
 	<!-- 		<div ng-include='"app/photoview.html"'></div> -->
-	<div ui-view="main"></div>
+	<div ng-controller="photobox.controller as mainController">
+		<div ui-view="main"></div>
+	</div>
 
 
 
@@ -69,6 +71,14 @@
 	<!-- endbower -->
 	<!-- endbuild -->
 
+	<!-- build:js({.tmp,app}) client/app/scripts/scripts.js -->
+
+    <!-- main files -->
+	<script src="app/picturebox.module.js"></script>
+	<script src="app/photobox.controller.js"></script>
+	<script src="app/logout.service.js"></script>
+	<script src="app/resource.service.js"></script>
+	
 	<!-- Components -->
 	<script src="app/components/componentsModule.js"></script>
 	<script src="app/components/util/filter.js"></script>
@@ -78,11 +88,6 @@
 	<script src="app/components/imageView/imageViewDirective.js"></script>
 	<script src="app/components/imageView/swipe/imageSwipeDirective.js"></script>
 
-	<!-- build:js({.tmp,app}) client/app/scripts/scripts.js -->
-	<script src="app/picturebox.module.js"></script>
-	<script src="app.js"></script>
-
-	<script src="app/resource.service.js"></script>
 	<!-- folder view -->
 	<script src="app/folderView/folder.view.module.js"></script>
 	<script src="app/folderView/folder.view.config.js"></script>

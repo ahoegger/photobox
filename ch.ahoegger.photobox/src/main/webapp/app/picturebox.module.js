@@ -1,6 +1,7 @@
-(function (angular) {
-    'use strict';
+(function(angular) {
+  'use strict';
 
-    angular.module('module.picturebox', []);
+  angular
+      .module('module.picturebox', [ 'modulePictureboxComponents', 'module.picturebox.folderview', 'ngAnimate', 'ngCookies', 'ngResource', 'ui.router', 'ngSanitize', 'ngTouch' ]);
 
 })(angular);

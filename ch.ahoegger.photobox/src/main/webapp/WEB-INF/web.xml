@@ -25,15 +25,37 @@
 		<param-name>ch.ahoegger.picturebox.dbLocation</param-name>
 		<param-value>E:/workspaces/private/photobox/db</param-value>
 	</context-param>
+
+	<!-- SECURITY -->
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>public</web-resource-name>
+			<url-pattern>/styles/main.css</url-pattern>
+		</web-resource-collection>
+		<!-- OMIT auth-constraint -->
+	</security-constraint>
+	
 	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>photobox</web-resource-name>
 			<url-pattern>/*</url-pattern>
 		</web-resource-collection>
+		<auth-constraint>
+			<role-name>photobox-user</role-name>
+		</auth-constraint>
 		<user-data-constraint>
 			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
 		</user-data-constraint>
 	</security-constraint>
+
+	<login-config>
+		<auth-method>FORM</auth-method>
+		<form-login-config>
+			<form-login-page>/login/login.html</form-login-page>
+			<form-error-page>/login/login-failed.html</form-error-page>
+		</form-login-config>
+	</login-config>
+
 	<!-- LISTENERS -->
 	<listener>
 		<listener-class>org.apache.logging.log4j.web.Log4jServletContextListener</listener-class>

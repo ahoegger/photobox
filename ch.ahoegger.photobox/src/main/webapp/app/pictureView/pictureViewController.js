@@ -6,7 +6,7 @@
 
   angular.module('module.picturebox.pictureview').controller(_controllerName, Controller);
 
-  function Controller($state, $stateParams,$location, resourceService) {
+  function Controller($state, $stateParams,$location, resourceService, logoutService) {
     var self = this;
     self.files = undefined;
     console.log('start controller ', _controllerName, $stateParams);
@@ -74,8 +74,9 @@
       resourceService.postImage(updateImg);
     };
     
+    
 
   }
   
-  Controller.$inject = [ '$state', '$stateParams', '$location','resource.service' ]
+  Controller.$inject = [ '$state', '$stateParams', '$location','resource.service', 'logout.service' ]
 })(angular);

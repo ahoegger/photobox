@@ -15,22 +15,35 @@
       }
     }
     > .right{
+      display: flex;
+      
       >.tool-button {
-        display: inline-block;
+
         width: 45px;
-        padding: 2px;
+        padding: 5px;
         margin: 2px;
         text-align: center;
+        vertical-align: middle;
         background-color: @background-color-picture-view-full-screen;
         color: white;
         border-radius: 3px; 
         font-size: x-large;
         .responsive-small({
-          padding: 5px;
-          margin: 5px;
+//          padding: 5px;
+//          margin: 5px;
           width: 35px;
           font-size: large;
         });
+        &.logout {
+          color: @background-color-picture-view-full-screen;
+          background-color: white;
+          border-radius: 3px;
+          border: solid 1px  @background-color-picture-view-full-screen;
+          .responsive-small({
+            margin-left: 5px;
+          });
+          margin-left: 10px
+        }
       }
     }
     

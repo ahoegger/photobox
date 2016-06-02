@@ -15,6 +15,11 @@
     @rules();
   }
 }
+
+.responsive-medium-large(@rules){
+  .responsive-medium(@rules);
+  .responsive-large(@rules);
+}
 .padding-horizontal-media(){
   .responsive-large( {
     padding-left: 20px;
@@ -44,29 +49,49 @@
 }
 
 .margin-horizontal-media(){
-  .responsive-large( {
-    margin-left: 20px;
-    margin-right: 20px;
+  .margin-horizontal-media(0, 5px, 20px);
+}
+.margin-horizontal-media(@small, @medium, @large){
+  .responsive-small( {
+    margin-left: @small;
+    margin-right: @small;
   });
   .responsive-medium( {
-    margin-left: 5px;
-    margin-right: 5px;
+    margin-left: @medium;
+    margin-right: @medium;
   });
-/*   .responsive-small( { */
-/*     margin: 20px; */
-/*   }); */
+  .responsive-large( {
+    margin-left: @large;
+    margin-right: @large;
+  });
+
+}
+.margin-vertical-media(){
+	.margin-vertical-media(0, 5px, 20px)
+}
+.margin-vertical-media(@small, @medium, @large){
+  .responsive-small( {
+    margin-top: @small;
+    margin-bottom: @small;
+  });
+  .responsive-medium( {
+    margin-top: @medium;
+    margin-bottom: @medium;
+  });
+  .responsive-large( {
+    margin-top: @large;
+    margin-bottom: @large;
+  });
+
 }
 
-.margin-vertical-media(){
-  .responsive-large( {
-    margin-top: 20px;
-    margin-bottom: 20px;
-  });
-  .responsive-medium( {
-    margin-top: 5px;
-    margin-bottom: 5px;
-  });
-/*   .responsive-small( { */
-/*     margin: 20px; */
-/*   }); */
+.font-size-small-media(){
+	font-size: 1em;
+	.responsive-medium( {
+      font-size: 1em;
+    });
+    .responsive-large( {
+      font-size: 1.1em;
+    });
+  
 }
