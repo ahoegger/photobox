@@ -1,2 +1,7 @@
-<div class="swipe-container">
+<div class="swipe-container"></div>
+<div class="tool-button previous angular-fade-in-out" ng-if="!fullScreen && hasPrevious()" ng-click="navigatePrevious()">
+	<i class="fa fa-angle-left" aria-hidden="true"></i>
+</div>
+<div class="tool-button next angular-fade-in-out" ng-if="!fullScreen && hasNext()" ng-click="navigateNext()">
+	<i class="fa fa-angle-right" aria-hidden="true"></i>
 </div>

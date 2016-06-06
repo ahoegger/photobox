@@ -5,13 +5,14 @@ import javax.ws.rs.core.Application;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import ch.ahoegger.photobox.dao.Resource;
-import ch.ahoegger.photobox.rest.ApiFolderService;
 
 import com.google.gson.Gson;
 
+@Ignore
 public class ResourceServiceTest extends JerseyTest {
 
   @Override

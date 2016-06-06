@@ -16,7 +16,9 @@
     
     // callback functions
     self.handleLogout = function(){
-      logoutService.logout();
+      logoutService.logout().finally(function(){
+        location.reload(); 
+      });
     };
     
 

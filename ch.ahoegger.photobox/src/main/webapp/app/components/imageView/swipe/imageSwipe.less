@@ -1,8 +1,6 @@
 photobox-image-swipe {
   display: block;
 
-
-  
   .swipe-container {
     height: 100%;
     width: 100%;
@@ -25,8 +23,20 @@ photobox-image-swipe {
   }
   
 
+  > .tool-button {
+    position: absolute;
+    top: calc(~"50vh - 22px");
+    background-color: @background-color-image-navigation-button;
   
+    &:hover {
+      background-color: @background-color-image-navigation-button-hover;
+    }
+    &.previous{
+        left: 20px;
+    }
+    &.next{
+        right: 20px;
+    }
 
-    
-    
+  }
 }

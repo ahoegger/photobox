@@ -18,34 +18,15 @@
 body {
 /*     padding-top: 1px; */
 /*     padding-bottom: 20px; */
-    position: relative;
+  position: relative;
+ .font-size-medium-media();
 }
 
 .clickable{
 	cursor: pointer;
 }
 
-.navigation{
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  background-color: @background-color-navigation-mobile;
-  border-bottom: solid 1px @border-color-navigation;
-  font-size: medium;
-  padding-left: 5px;
-  padding-right: 5px;
-  .padding-horizontal-media();
-  .padding-vertical-media();
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-
-  .responsive-small({
-    font-size: small;
-  });
-  
-
+.angular-fade-in-out {
   &.ng-enter {
     transition:@animation-duration-medium ease-out all;
     opacity:0;
@@ -61,6 +42,27 @@ body {
   &.ng-leave.ng-leave-active {
     opacity:0;
   }
+}
+
+.navigation{
+
+  background-color: @background-color-navigation-mobile;
+  border-bottom: solid 1px @border-color-navigation;
+  //font-size: medium;
+  padding-left: 5px;
+  padding-right: 5px;
+  .padding-horizontal-media();
+  .padding-vertical-media();
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  .responsive-small({
+    //font-size: small;
+  });
+  
+
+
   
   > .left {
     flex: 0 0 auto;
@@ -68,12 +70,61 @@ body {
   > .center {
     flex: 1 1 auto;
     text-align: center;
+    overflow-x: hidden;
   }
   > .right {
     flex: 0 0 auto;
+    display: flex;
+    
+   
   }
   > i:before{
     padding-left: 5px;
   }
   
+}
+
+.tool-button {
+  min-width: 45px;
+  min-height: 45px;
+//  padding: 5px;
+  margin: 2px;
+  text-align: center;
+  vertical-align: middle;
+  color: @background-color-picture-view-full-screen;
+  background-color: white;
+  border-radius: 3px; 
+  border: solid 1px  @background-color-picture-view-full-screen;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  .responsive-small({
+    min-width: 35px;
+    min-height: 35px;
+    > i {
+      font-size: large;
+    }
+    > span {
+      display: none;
+    }
+  });
+  &.logout {
+    .responsive-small({
+      margin-left: 5px;
+    });
+    margin-left: 10px
+  }
+  &.inverted {
+    background-color: @background-color-picture-view-full-screen;
+    color: white;
+  }
+  > i {
+    font-size: x-large;
+//    padding: 0 5px;
+  }
+  > span {
+    padding: 0 5px;
+  }
+
 }

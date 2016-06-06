@@ -33,6 +33,6 @@
         logout: logout
       };
     }
-    ResourceService.$inject = ['$http', '$q'];
+    LogoutService.$inject = ['$http', '$q'];
     
 })(angular);

@@ -205,8 +205,9 @@
 				<artifactId>maven-war-plugin</artifactId>
 				<version>2.3</version>
 				<configuration>
-					<warSourceExcludes>bower/bower_components/**</warSourceExcludes>
-					<!-- <warSourceIncludes>bower/bower_components/angular/angular.js</warSourceIncludes> -->
+<!-- 					<warSourceExcludes>bower/bower_components/**</warSourceExcludes> -->
+<!-- 					<warSourceIncludes>bower/bower_components/**.js</warSourceIncludes> -->
+<!-- 					<warSourceIncludes>bower/bower_components/angular/angular.js</warSourceIncludes> -->
 				</configuration>
 			</plugin>
 

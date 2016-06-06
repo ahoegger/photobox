@@ -3,46 +3,28 @@
   transition: background-color @animation-duration-medium ease-out;
     
   >.navigation{
-    >.left{
-      min-width: 30px;
-      > i {
-        font-size: medium;
-      }
-      .folder-name{
-        .responsive-small({
-          display: none;
-        });
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    >.center{
+
+      >.image-name{
+        white-space: nowrap;
+        text-overflow: ellipsis;
+         overflow: hidden; 
       }
     }
-    > .right{
-      display: flex;
-      
-      >.tool-button {
-
-        width: 45px;
-        padding: 5px;
-        margin: 2px;
-        text-align: center;
-        vertical-align: middle;
-        background-color: @background-color-picture-view-full-screen;
-        color: white;
-        border-radius: 3px; 
-        font-size: x-large;
-        .responsive-small({
-//          padding: 5px;
-//          margin: 5px;
-          width: 35px;
-          font-size: large;
-        });
-        &.logout {
-          color: @background-color-picture-view-full-screen;
-          background-color: white;
-          border-radius: 3px;
-          border: solid 1px  @background-color-picture-view-full-screen;
+    >.left {
+      min-width: 30px;
+      > .back-navigation{
+        > i {
+//          font-size: medium;
+        }
+        .folder-name {
           .responsive-small({
-            margin-left: 5px;
+            display: none;
           });
-          margin-left: 10px
         }
       }
     }
@@ -64,5 +46,7 @@
     background-color: @background-color-picture-view-full-screen;
 
   }
+  
+
 	
 }

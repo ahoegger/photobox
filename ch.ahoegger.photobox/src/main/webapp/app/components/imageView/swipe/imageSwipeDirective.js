@@ -16,6 +16,7 @@
     index : '=',
     imageSelection : '=?',
     indexUpdated : '=?',
+    fullScreen : '=?',
     rotateLeft : '=?',
     rotateRight : '=?',
     debounce : '@?'
@@ -43,6 +44,16 @@
         // var imageSrc=linkFilter($scope.files[$scope.index], 'Desktop');
         // $image02[0].setAttribute('image-src', imageSrc);
         _initialUpdateImagesDebounced();
+
+        // handler
+        $scope.navigateNext = _snapNext.bind(this);
+        $scope.hasNext = function() {
+          return $scope.files && $scope.files.length > currentIndex + 1;
+        }.bind(this);
+        $scope.navigatePrevious = _snapPrevious.bind(this);
+        $scope.hasPrevious = function() {
+          return $scope.files && currentIndex > 0;
+        }.bind(this);
         // listeners
 
         if ($scope.imageSelection) {
@@ -334,7 +345,10 @@
         deltaX = swipeCurrentX - swipeStartX;
         swipeCurrentX = undefined;
         swipeStartX = undefined;
-        _snap(deltaX);
+        $scope.$apply(function() {
+          _snap(deltaX);
+        });
+
       }
 
       function _snap(deltaX) {
@@ -348,10 +362,8 @@
         } else {
           _updatePositions(0);
           if (Math.abs(deltaX) < 10) {
-            console.log('img selection ' + $scope.files[currentIndex]);
-            $scope.$apply(function() {
-              $scope.imageSelection($scope.files[currentIndex]);
-            });
+            $scope.imageSelection($scope.files[currentIndex]);
+
           }
         }
       }
