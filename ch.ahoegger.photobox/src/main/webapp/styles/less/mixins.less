@@ -104,3 +104,23 @@
       font-size: medium;
     });
 }
+
+.navigation-height-media(){
+  height: @navigation-height-small;
+  .responsive-medium( {
+    height: @navigation-height-medium;
+  });
+  .responsive-large( {
+    height: @navigation-height-large;
+  });
+}
+
+.navigation-padding-top(){
+  padding-top: @navigation-height-small;
+  .responsive-medium( {
+    padding-top: @navigation-height-medium;
+  });
+  .responsive-large( {
+    padding-top: @navigation-height-large;
+  });
+}

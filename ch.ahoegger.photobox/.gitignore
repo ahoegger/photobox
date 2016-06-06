@@ -1,2 +1,3 @@
 target
 src/test/resources/pictureDir/**
+derby.log
