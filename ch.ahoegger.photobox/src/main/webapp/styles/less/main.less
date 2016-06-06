@@ -1,4 +1,4 @@
-@import "../../bower/bower_components/bootstrap/less/bootstrap.less";
+// @import "../../bower/bower_components/bootstrap/less/bootstrap.less";
 @import "../../bower/bower_components/fontawesome/less/font-awesome.less";
 @import "variables.less";
 @import "lookAndFeel.less";
@@ -15,9 +15,23 @@
 /* VARIABLES */
 @fa-font-path: "../bower/bower_components/fontawesome/fonts";
 
+/* reset box sizing */
+* {
+  box-sizing: border-box;
+}
+*:before,
+*:after {
+  box-sizing: border-box;
+}
+html{
+  font-family: sans-serif; // 1
+  -ms-text-size-adjust: 100%; // 2
+  -webkit-text-size-adjust: 100%; // 2
+}
 body {
 /*     padding-top: 1px; */
 /*     padding-bottom: 20px; */
+  margin: 0;
   position: relative;
  .font-size-medium-media();
 }
