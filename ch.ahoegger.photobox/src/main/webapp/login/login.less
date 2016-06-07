@@ -6,16 +6,26 @@ body.login{
     justify-content: center;
     
   form {
-    .font-size-small-media();
-    width: 80%;
+    .font-size-medium-media();
+    width: calc(~"100% - 20px");
+    
     padding: 20px;
     border: solid 1px black;
+/*     margin: 0 10px; */
+    
     position: relative;
     
     >.field{
       .margin-vertical-media(5px, 10px, 15px);
+      >.field-label{
+        padding: 3px 3px 3px 0;
+      }
       >.field-input{
+       
         width: 100%;    
+      }
+      &.error{
+        color: @color-error;
       }
     }
     >.button-bar {
