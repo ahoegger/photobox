@@ -14,16 +14,16 @@
 	</context-param>
 	<context-param>
 		<param-name>ch.ahoegger.picturebox.original-directory</param-name>
-		<param-value>/data/andy/photobox/original</param-value>
+		<param-value>/data/common/pictures</param-value>
 	</context-param>
 	<context-param>
 		<param-name>ch.ahoegger.picturebox.working-directory</param-name>
-		<param-value>/data/andy/photobox/workingDir</param-value>
+		<param-value>/data/tariffa/tomcat8/photobox/workingDir</param-value>
 	</context-param>
 
 	<context-param>
 		<param-name>ch.ahoegger.picturebox.dbLocation</param-name>
-		<param-value>/data/andy/photobox/db</param-value>
+		<param-value>/data/tariffa/tomcat8/photobox/db</param-value>
 	</context-param>
 
 	<!-- SECURITY -->
@@ -57,9 +57,6 @@
 	</login-config>
 
 	<!-- LISTENERS -->
-	<listener>
-		<listener-class>org.apache.logging.log4j.web.Log4jServletContextListener</listener-class>
-	</listener>
 	<listener>
 		<listener-class>ch.ahoegger.photobox.scale.ExecuterContext</listener-class>
 	</listener>

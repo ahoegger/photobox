@@ -27,7 +27,7 @@ public class PhotoService {
   @Path("/{id}")
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response newTodo(@PathParam("id") String imageIdRaw, Picture picture) throws IOException {
+  public Response storePicture(@PathParam("id") String imageIdRaw, Picture picture) throws IOException {
     long id = 0L;
     if (imageIdRaw != null) {
       id = Long.parseLong(imageIdRaw);

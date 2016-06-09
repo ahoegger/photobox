@@ -7,13 +7,13 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SimpleServlet extends HttpServlet {
 
   private static final long serialVersionUID = 1L;
-  protected Logger LOG = LogManager.getLogger(SimpleServlet.class);
+  protected Logger LOG = LoggerFactory.getLogger(SimpleServlet.class);
 
   @Override
   public void init() throws ServletException {

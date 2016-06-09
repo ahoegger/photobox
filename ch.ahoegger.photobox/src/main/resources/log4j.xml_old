@@ -1,8 +1,8 @@
 <!-- <?xml version="1.0" encoding="UTF-8"?> -->
 <Configuration>
 	<Appenders>
-		<RollingFile name="file" fileName="D:/logs/photobook.log"
-		filePattern="D:/logs/photobook-%d{MM-dd-yyyy}.log.gz" ignoreExceptions="false">
+		<RollingFile name="file" fileName="${catalina.base}/logs/photobox.log"
+		filePattern="${catalina.base}/logs/photobox-%d{MM-dd-yyyy}.log.gz" ignoreExceptions="false">
 <!-- 			filePattern="${CATALINA_HOME}/logs/photobook-%d{MM-dd-yyyy}.log.gz" ignoreExceptions="false"> -->
 			<PatternLayout>
 				<Pattern>%d %p %c{1.} [%t] %m%n</Pattern>

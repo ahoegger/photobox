@@ -1,4 +1,4 @@
-<div class="folder-title">{{folder.name}}</div>
+<div class="folder-title">{{folder.name}} #{{folder.pictures.length}}</div>
 <photobox-image-preview ng-repeat="previmg in previewImages" 
 		image-src="rest/picture/{{previmg.id}}"
 		image="previmg"></photobox-image-preview>

@@ -76,6 +76,7 @@ public class DbFolder implements IDbFolder {
         if (active != null) {
           sqlBuilder.append(" AND ").append(COL_ACTIVE).append(" = ?");
         }
+        sqlBuilder.append(" ORDER BY ").append(COL_NAME);
         return sqlBuilder.toString();
       }
 

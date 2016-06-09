@@ -63,6 +63,7 @@ public class DbPicture implements IDbPicture {
         if (active != null) {
           sqlBuilder.append(" AND ").append(COL_ACTIVE).append(" = ?");
         }
+        sqlBuilder.append(" ORDER BY ").append(COL_CAPTURE_DATE);
         return sqlBuilder.toString();
       }
 

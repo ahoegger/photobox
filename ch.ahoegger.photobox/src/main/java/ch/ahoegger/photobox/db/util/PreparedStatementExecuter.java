@@ -5,13 +5,13 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ch.ahoegger.photobox.db.DbAccess;
 
 public abstract class PreparedStatementExecuter<T> {
-  protected static Logger LOG = LogManager.getLogger(PreparedStatementExecuter.class);
+  protected static Logger LOG = LoggerFactory.getLogger(PreparedStatementExecuter.class);
 
   public final T execute() {
     Connection conn = null;
@@ -19,15 +19,18 @@ public abstract class PreparedStatementExecuter<T> {
       conn = DriverManager.getConnection(DbAccess.DB_URL);
       conn.setAutoCommit(true);
       return executeQuery(conn);
-    } catch (SQLException e) {
+    }
+    catch (SQLException e) {
       LOG.error("Could not execute query.", e);
       return null;
-    } finally {
+    }
+    finally {
       try {
         if (conn != null) {
           conn.close();
         }
-      } catch (SQLException se) {
+      }
+      catch (SQLException se) {
         LOG.error("Could not close connection.", se);
       }
     }
@@ -38,7 +41,8 @@ public abstract class PreparedStatementExecuter<T> {
     try {
       return bindAndExecute(connection, statement);
 
-    } finally {
+    }
+    finally {
       if (statement != null) {
         statement.close();
       }

@@ -10,13 +10,12 @@ import java.nio.file.Path;
 
 import javax.imageio.ImageIO;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.message.ParameterizedMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ScaleTask {
 
-  protected static Logger LOG = LogManager.getLogger(ScaleTask.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ScaleTask.class);
   private Path originalImage;
   private Path destFile;
   private int resolution;
@@ -45,7 +44,8 @@ public class ScaleTask {
         height = maxEdge;
         double scaleFactor = (double) maxEdge / (double) originalHeight;
         width = (int) (scaleFactor * originalWidth);
-      } else {
+      }
+      else {
         width = maxEdge;
         double scaleFactor = (double) maxEdge / (double) originalWidth;
         height = (int) (scaleFactor * originalHeight);
@@ -67,8 +67,9 @@ public class ScaleTask {
       if (LOG.isDebugEnabled()) {
         LOG.debug("Created image '{}'.", getDestFile());
       }
-    } catch (IOException e) {
-      LOG.error(new ParameterizedMessage("Could not scale image '{}'.", getOriginalImage()), e);
+    }
+    catch (IOException e) {
+      LOG.error(String.format("Could not scale image '%s'.", getOriginalImage()), e);
     }
 
   }

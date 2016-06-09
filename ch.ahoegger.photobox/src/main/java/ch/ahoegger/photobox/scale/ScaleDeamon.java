@@ -11,13 +11,13 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ch.ahoegger.photobox.IProperties;
 
 public class ScaleDeamon implements ServletContextListener {
-  public static final Logger LOG = LogManager.getLogger(ScaleDeamon.class);
+  public static final Logger LOG = LoggerFactory.getLogger(ScaleDeamon.class);
   private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
   @Override

@@ -5,13 +5,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ch.ahoegger.photobox.db.util.StatementExecuter;
 
 public final class DbSequence implements IDbSequence {
-  protected static Logger LOG = LogManager.getLogger(DbSequence.class);
+  protected static Logger LOG = LoggerFactory.getLogger(DbSequence.class);
 
   public synchronized static Long getNextKey() {
 

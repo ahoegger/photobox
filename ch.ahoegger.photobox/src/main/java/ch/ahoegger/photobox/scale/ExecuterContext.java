@@ -9,12 +9,13 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ExecuterContext implements ServletContextListener {
 
-  protected static Logger LOG = LogManager.getLogger(ExecuterContext.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ExecuterContext.class);
+//  protected static Logger LOG = LogManager.getLogger(ExecuterContext.class);
   private ExecutorService executor;
 
   public void contextInitialized(ServletContextEvent sce) {
@@ -23,12 +24,14 @@ public class ExecuterContext implements ServletContextListener {
     ThreadFactory daemonFactory = new DaemonThreadFactory();
     try {
       nr_executors = Integer.parseInt(context.getInitParameter("nr-executors"));
-    } catch (NumberFormatException ignore) {
+    }
+    catch (NumberFormatException ignore) {
     }
 
     if (nr_executors <= 1) {
       executor = Executors.newSingleThreadExecutor(daemonFactory);
-    } else {
+    }
+    else {
       executor = Executors.newFixedThreadPool(nr_executors, daemonFactory);
     }
     context.setAttribute("MY_EXECUTOR", executor);
@@ -42,10 +45,12 @@ public class ExecuterContext implements ServletContextListener {
         LOG.debug("Executer will be killed.");
         executor.shutdownNow(); // or process/wait until all pending jobs are
                                 // done
-      } else {
+      }
+      else {
         LOG.debug("Executer shutdown successfully.");
       }
-    } catch (InterruptedException e) {
+    }
+    catch (InterruptedException e) {
 
     }
   }

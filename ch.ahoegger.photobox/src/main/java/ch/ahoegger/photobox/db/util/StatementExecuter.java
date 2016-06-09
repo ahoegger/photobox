@@ -5,13 +5,13 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ch.ahoegger.photobox.db.DbAccess;
 
 public abstract class StatementExecuter<T> {
-  protected static Logger LOG = LogManager.getLogger(StatementExecuter.class);
+  private static Logger LOG = LoggerFactory.getLogger(StatementExecuter.class);
 
   public final T execute() {
     T retVal = null;
@@ -22,20 +22,24 @@ public abstract class StatementExecuter<T> {
       conn.setAutoCommit(true);
       stmt = conn.createStatement();
       retVal = executeQuery(conn, stmt);
-    } catch (SQLException e) {
+    }
+    catch (SQLException e) {
       LOG.error("Could not execute query.", e);
-    } finally {
+    }
+    finally {
       try {
         if (stmt != null) {
           stmt.close();
         }
-      } catch (SQLException se2) {
+      }
+      catch (SQLException se2) {
       }// nothing we can do
       try {
         if (conn != null) {
           conn.close();
         }
-      } catch (SQLException se) {
+      }
+      catch (SQLException se) {
         LOG.error("Could not close connection.", se);
       }
     }

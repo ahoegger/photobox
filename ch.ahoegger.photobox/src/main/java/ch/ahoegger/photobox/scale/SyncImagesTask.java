@@ -10,8 +10,8 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Stack;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ch.ahoegger.photobox.IProperties;
 import ch.ahoegger.photobox.PhotoUtility;
@@ -22,7 +22,7 @@ import ch.ahoegger.photobox.db.DbPicture;
 import ch.ahoegger.photobox.db.DbSequence;
 
 public class SyncImagesTask implements Runnable {
-  protected static Logger LOG = LogManager.getLogger(SyncImagesTask.class);
+  protected static Logger LOG = LoggerFactory.getLogger(SyncImagesTask.class);
 
   private Path m_orignalDirectory;
   private PathMatcher m_imageMatcher = FileSystems.getDefault().getPathMatcher("glob:*.{jpg,gif,png}");
@@ -36,13 +36,15 @@ public class SyncImagesTask implements Runnable {
 
   @Override
   public void run() {
-    m_imageMatcher = FileSystems.getDefault().getPathMatcher("glob:**.{jpg,gif,png}");
+    LOG.debug("Start sync image task. original:'{}', working:{}", m_orignalDirectory, m_workingDirectory);
+    m_imageMatcher = FileSystems.getDefault().getPathMatcher("glob:**.{jpg,JPG}");
     try {
       Files.walkFileTree(m_orignalDirectory, new SimpleFileVisitor<Path>() {
         private Stack<Folder> m_parents = new Stack<Folder>();
 
         @Override
         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+          LOG.debug("Visit file '{}'", file);
           if (m_imageMatcher.matches(file)) {
             scaleImage(file, getParentId());
           }
@@ -51,6 +53,7 @@ public class SyncImagesTask implements Runnable {
 
         @Override
         public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+          LOG.debug("Pre visit directory '{}'", dir);
           Folder folder = syncDirectory(dir, getParentId());
           m_parents.push(folder);
           return FileVisitResult.CONTINUE;
@@ -58,8 +61,8 @@ public class SyncImagesTask implements Runnable {
 
         @Override
         public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+          LOG.debug("Post visit directory '{}'", dir);
           m_parents.pop();
-          System.out.println("postVisit Dir: " + dir);
           return FileVisitResult.CONTINUE;
         }
 
@@ -72,12 +75,14 @@ public class SyncImagesTask implements Runnable {
 
       });
     }
-    catch (IOException e1) {
+    catch (Exception e1) {
       LOG.error("Could not scale images.", e1);
     }
+    LOG.debug("End sync image task. original:'{}', working:{}", m_orignalDirectory, m_workingDirectory);
   }
 
   private Folder syncDirectory(Path original, Long parentId) {
+    LOG.debug("sync directory '{}'", original);
     if (original.equals(m_orignalDirectory)) {
       return Folder.ROOT;
     }
@@ -97,6 +102,7 @@ public class SyncImagesTask implements Runnable {
   }
 
   private Picture scaleImage(Path original, Long parentId) {
+    LOG.debug("Scale image '{}'.", original);
 
     Path relPath = m_orignalDirectory.relativize(original);
     Picture picture = DbPicture.findByOrignalPath(PhotoUtility.pathToString(relPath, "/"));
