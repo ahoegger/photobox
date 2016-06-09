@@ -34,7 +34,7 @@
 		</web-resource-collection>
 		<!-- OMIT auth-constraint -->
 	</security-constraint>
-	
+
 	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>photobox</web-resource-name>
@@ -106,10 +106,6 @@
 		<init-param>
 			<param-name>javax.ws.rs.Application</param-name>
 			<param-value>ch.ahoegger.photobox.rest.PhotobookApplication</param-value>
-		</init-param>
-		<init-param>
-			<param-name>ch.ahoegger.pictureDirectory</param-name>
-			<param-value>D:/temp/max24h/webDev/photobook/original</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>

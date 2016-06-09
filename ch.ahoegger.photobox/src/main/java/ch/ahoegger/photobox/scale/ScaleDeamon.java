@@ -46,7 +46,8 @@ public class ScaleDeamon implements ServletContextListener {
       return;
     }
 
-    scheduler.scheduleWithFixedDelay(new SyncImagesTask(originalDirectory, workingDirectory), 2, 20, TimeUnit.SECONDS);
+    scheduler.scheduleWithFixedDelay(new SyncImagesTask(originalDirectory, workingDirectory), 1, 1440, TimeUnit.MINUTES);
+
   }
 
   @Override

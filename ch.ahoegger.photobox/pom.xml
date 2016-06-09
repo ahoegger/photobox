@@ -10,7 +10,16 @@
 	<properties>
 		<version.jersey>2.22.1</version.jersey>
 		<version.servlet.api>3.0.1</version.servlet.api>
+		<webxml.path>${project.basedir}/src/main/config/dev/WEB-INF/web.xml</webxml.path>
 	</properties>
+	<profiles>
+		<profile>
+			<id>tariffa</id>
+			<properties>
+				<webxml.path>${project.basedir}/src/main/config/tariffa/WEB-INF/web.xml</webxml.path>
+			</properties>
+		</profile>
+	</profiles>
 
 	<dependencies>
 
@@ -176,6 +185,7 @@
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
+
 				</configuration>
 			</plugin>
 
@@ -205,9 +215,10 @@
 				<artifactId>maven-war-plugin</artifactId>
 				<version>2.3</version>
 				<configuration>
-<!-- 					<warSourceExcludes>bower/bower_components/**</warSourceExcludes> -->
-<!-- 					<warSourceIncludes>bower/bower_components/**.js</warSourceIncludes> -->
-<!-- 					<warSourceIncludes>bower/bower_components/angular/angular.js</warSourceIncludes> -->
+					<webXml>${webxml.path}</webXml>
+					<!-- <warSourceExcludes>bower/bower_components/**</warSourceExcludes> -->
+					<!-- <warSourceIncludes>bower/bower_components/**.js</warSourceIncludes> -->
+					<!-- <warSourceIncludes>bower/bower_components/angular/angular.js</warSourceIncludes> -->
 				</configuration>
 			</plugin>
 

@@ -1,7 +1,5 @@
 package ch.ahoegger.photobox.rest;
 
-import java.io.File;
-
 import javax.annotation.PostConstruct;
 import javax.json.stream.JsonGenerator;
 import javax.servlet.ServletConfig;
@@ -18,7 +16,6 @@ public class PhotobookApplication extends ResourceConfig {
 
   @Context
   private ServletConfig config;
-  private File pictureDirectory;
 
   public PhotobookApplication() {
     packages("ch.ahoegger.photobox.rest");
@@ -35,32 +32,7 @@ public class PhotobookApplication extends ResourceConfig {
   protected void init() {
     // pircureDirectory
     DbAccess.setDbLocation(config.getServletContext().getInitParameter("ch.ahoegger.picturebox.dbLocation"));
-    System.out.println("APP INIT: " + config.getInitParameter("ch.ahoegger.pictureDirectory"));
-    setPictureDirectory(new File(config.getInitParameter("ch.ahoegger.pictureDirectory")));
 
   }
 
-  public File getPictureDirectory() {
-    return pictureDirectory;
-  }
-
-  private void setPictureDirectory(File pictureDirectory) {
-    this.pictureDirectory = pictureDirectory;
-  }
-
-  // @Override
-  // public Set<Class<?>> getClasses() {
-  // final Set<Class<?>> classes = new HashSet<Class<?>>();
-  // // register root resource
-  // // classes.add(ResourceService.class);
-  // classes.add(PictureService.class);
-  // return classes;
-  // }
-  //
-  // @Override
-  // public Set<Object> getSingletons() {
-  // Set<Object> singletons = new HashSet<Object>();
-  // singletons.add(new ResourceService());
-  // return singletons;
-  // }
 }
