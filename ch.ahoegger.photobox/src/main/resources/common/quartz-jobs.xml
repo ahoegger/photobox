@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<job-scheduling-data
+	xmlns="http://www.quartz-scheduler.org/xml/JobSchedulingData"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.quartz-scheduler.org/xml/JobSchedulingData http://www.quartz-scheduler.org/xml/job_scheduling_data_2_0.xsd"
+	version="1.8">
+
+	<schedule>
+		<job>
+			<name>ScaleJob</name>
+			<job-class>ch.ahoegger.photobox.scale.ScaleJob</job-class>
+		</job>
+		<trigger>
+			<cron>
+				<name>ScaleJob</name>
+				<job-name>ScaleJob</job-name>
+				<cron-expression>0 0 3 30 * ?</cron-expression>
+			</cron>
+		</trigger>
+		<trigger>
+			<simple>
+				<name>ScaleJobStartup</name>
+				<description>Run once at startup</description>
+				<job-name>ScaleJob</job-name>
+				<start-time-seconds-in-future>5</start-time-seconds-in-future>
+				<repeat-count>0</repeat-count>
+				<repeat-interval>0</repeat-interval>
+			</simple>
+		</trigger>
+	</schedule>
+
+</job-scheduling-data>

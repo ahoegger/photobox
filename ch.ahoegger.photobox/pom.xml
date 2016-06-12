@@ -10,14 +10,15 @@
 	<properties>
 		<version.jersey>2.22.1</version.jersey>
 		<version.servlet.api>3.0.1</version.servlet.api>
-		<webxml.path>${project.basedir}/src/main/config/dev/WEB-INF/web.xml</webxml.path>
+		<version.quarz>2.2.1</version.quarz>
+		<webxml.path>${project.basedir}/src/main/webapp/WEB-INF/web.xml</webxml.path>
 		<resource.path>${project.basedir}/src/main/resources/dev</resource.path>
 	</properties>
 	<profiles>
 		<profile>
 			<id>tariffa</id>
 			<properties>
-				<webxml.path>${project.basedir}/src/main/config/tariffa/WEB-INF/web.xml</webxml.path>
+				<webxml.path>${project.basedir}/src/main/webapp_tariffa/WEB-INF/web.xml</webxml.path>
 				<resource.path>${project.basedir}/src/main/resources/tariffa</resource.path>
 			</properties>
 		</profile>
@@ -124,6 +125,22 @@
 			<artifactId>derby</artifactId>
 			<version>10.12.1.1</version>
 		</dependency>
+		<dependency>
+			<groupId>org.quartz-scheduler</groupId>
+			<artifactId>quartz</artifactId>
+			<version>${version.quarz}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.quartz-scheduler</groupId>
+			<artifactId>quartz-jobs</artifactId>
+			<version>${version.quarz}</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.transaction</groupId>
+			<artifactId>jta</artifactId>
+			<version>1.1</version>
+		</dependency>
+
 		<dependency>
 			<groupId>com.drewnoakes</groupId>
 			<artifactId>metadata-extractor</artifactId>

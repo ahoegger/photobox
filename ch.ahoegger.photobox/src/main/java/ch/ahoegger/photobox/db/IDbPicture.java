@@ -2,10 +2,10 @@ package ch.ahoegger.photobox.db;
 
 public interface IDbPicture {
   String TABLE_NAME = "PHOTOBOX_PICTURE";
+  String TABLE_ALIAS = "P";
 
   String COL_ID = "ID";
   String COL_CAPTURE_DATE = "CAPTURE_DATE";
-  String COL_FOLDER_ID = "FOLDER_ID";
   String COL_NAME = "NAME";
   String COL_ROTATION = "ROTATION";
   String COL_PATH_ORIGINAL = "PATH_ORIGINAL";

@@ -8,22 +8,37 @@
 
 
 
-	<context-param>
-		<param-name>log4jConfiguration</param-name>
-		<param-value>log4j.xml</param-value>
-	</context-param>
+	<!-- photobox -->
 	<context-param>
 		<param-name>ch.ahoegger.picturebox.original-directory</param-name>
-		<param-value>D:/temp/max24h/webDev/photobook/original</param-value>
+		<param-value>/data/common/pictures</param-value>
 	</context-param>
 	<context-param>
 		<param-name>ch.ahoegger.picturebox.working-directory</param-name>
-		<param-value>D:/temp/max24h/webDev/photobook/working</param-value>
+		<param-value>/data/tariffa/tomcat8/photobox/workingDir</param-value>
 	</context-param>
 
 	<context-param>
 		<param-name>ch.ahoegger.picturebox.dbLocation</param-name>
-		<param-value>E:/workspaces/private/photobox/db</param-value>
+		<param-value>/data/tariffa/tomcat8/photobox/db</param-value>
+	</context-param>
+
+	<!-- quartz -->
+	<context-param>
+		<param-name>quartz:config-file</param-name>
+		<param-value>quartz.properties</param-value>
+	</context-param>
+	<context-param>
+		<param-name>quartz:shutdown-on-unload</param-name>
+		<param-value>true</param-value>
+	</context-param>
+	<context-param>
+		<param-name>quartz:wait-on-shutdown</param-name>
+		<param-value>true</param-value>
+	</context-param>
+	<context-param>
+		<param-name>quartz:start-scheduler-on-load</param-name>
+		<param-value>true</param-value>
 	</context-param>
 
 	<!-- SECURITY -->
@@ -58,11 +73,12 @@
 
 	<!-- LISTENERS -->
 	<listener>
-		<listener-class>ch.ahoegger.photobox.scale.ExecuterContext</listener-class>
+		<listener-class>ch.ahoegger.photobox.configuration.ConfigurationListener</listener-class>
 	</listener>
 	<listener>
-		<listener-class>ch.ahoegger.photobox.scale.ScaleDeamon</listener-class>
+		<listener-class>org.quartz.ee.servlet.QuartzInitializerListener</listener-class>
 	</listener>
+
 	<!-- SERVLETS -->
 	<servlet>
 		<servlet-name>static</servlet-name>

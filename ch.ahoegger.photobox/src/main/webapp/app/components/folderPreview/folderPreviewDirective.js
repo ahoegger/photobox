@@ -25,14 +25,18 @@
 
       (function _init() {
         if ($scope.folder.childrenLoaded) {
-          _createPreviewImages($scope.folder);
+//          _createPreviewImages($scope.folder);
+          $scope.pictureCount = response.totalPictureCount;
+          $scope.previewImages = response.previewPictures;
         } else {
           var apiUrl = 'rest/api/'+$scope.folder.id;
 //          var apiUrl = $filter('imageLinkFilter')($scope.folder.links, 'api');
           if (apiUrl) {
             resourceService.getResources(apiUrl).then(function(response) {
 //              $scope.$apply(function() {
-                _createPreviewImages(response);
+//                _createPreviewImages(response);
+                $scope.pictureCount = response.totalPictureCount;
+                $scope.previewImages = response.previewPictures;
 //              });
 
             });

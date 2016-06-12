@@ -1,11 +1,8 @@
-package ch.ahoegger.photobox.scale;
+package ch.ahoegger.photobox.configuration;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -16,60 +13,54 @@ import org.slf4j.LoggerFactory;
 
 import ch.ahoegger.photobox.IProperties;
 
-public class ScaleDeamon implements ServletContextListener {
-  public static final Logger LOG = LoggerFactory.getLogger(ScaleDeamon.class);
-  private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+/**
+ * <h3>{@link Configuration}</h3>
+ *
+ * @author aho
+ */
+public class ConfigurationListener implements ServletContextListener {
+
+  public static final Logger LOG = LoggerFactory.getLogger(ConfigurationListener.class);
 
   @Override
   public void contextInitialized(ServletContextEvent sce) {
-    // TODO Auto-generated method stub
+    // setup configuration
 
     ServletContext ctx = sce.getServletContext();
     String originalDirectoryName = ctx.getInitParameter(IProperties.CONTEXT_PARAM_ORIGINAL_DIRECTORY);
     if (originalDirectoryName == null || originalDirectoryName.trim().length() == 0) {
       LOG.warn("Missing context-param '{}'.", IProperties.CONTEXT_PARAM_ORIGINAL_DIRECTORY);
-      return;
+      throw new RuntimeException(String.format("Missing context-param '%s'.", IProperties.CONTEXT_PARAM_ORIGINAL_DIRECTORY));
     }
     Path originalDirectory = Paths.get(originalDirectoryName);
     if (!Files.isDirectory(originalDirectory)) {
       LOG.warn("Orinal directory '{}' does not exist. See context-param '{}'.", originalDirectoryName, IProperties.CONTEXT_PARAM_ORIGINAL_DIRECTORY);
-      return;
+      throw new RuntimeException(String.format("Orinal directory '%s' does not exist. See context-param '%s'.", originalDirectoryName, IProperties.CONTEXT_PARAM_ORIGINAL_DIRECTORY));
     }
+    Configuration.setOriginalDirectory(originalDirectory);
     String workingDirectoryName = ctx.getInitParameter(IProperties.CONTEXT_PARAM_WORKING_DIRECTORY);
     if (workingDirectoryName == null || workingDirectoryName.trim().length() == 0) {
       LOG.warn("Missing context-param '{}'.", IProperties.CONTEXT_PARAM_WORKING_DIRECTORY);
-      return;
+      throw new RuntimeException(String.format("Missing context-param '%s'.", IProperties.CONTEXT_PARAM_WORKING_DIRECTORY));
     }
     Path workingDirectory = Paths.get(workingDirectoryName);
     if (!Files.isDirectory(workingDirectory)) {
       LOG.warn("Working directory '{}' does not exist. See context-param '{}'.", workingDirectoryName, IProperties.CONTEXT_PARAM_WORKING_DIRECTORY);
-      return;
+      throw new RuntimeException(String.format("Working directory '%s' does not exist. See context-param '%S'.", workingDirectoryName, IProperties.CONTEXT_PARAM_WORKING_DIRECTORY));
     }
+    Configuration.setWorkingDirectory(workingDirectory);
+    // db connection url
 
-    scheduler.scheduleWithFixedDelay(new SyncImagesTask(originalDirectory, workingDirectory), 1, 1440, TimeUnit.MINUTES);
-
+    String dbLocation = ctx.getInitParameter(IProperties.CONTEXT_PARAM_DB_LOCATION);
+    if (dbLocation == null || dbLocation.isEmpty()) {
+      LOG.warn("Missing config property DB location '{}' . See context-param '{}'.", dbLocation, IProperties.CONTEXT_PARAM_DB_LOCATION);
+      throw new RuntimeException(String.format("Missing config property DB location '%s' . See context-param '%s'.", dbLocation, IProperties.CONTEXT_PARAM_DB_LOCATION));
+    }
+    Configuration.setDbLocation(dbLocation);
   }
 
   @Override
   public void contextDestroyed(ServletContextEvent sce) {
-    // TODO Auto-generated method stub
-    System.out.println("stop ScaleDeamon");
-    LOG.debug("Shotdown Executer");
-    scheduler.shutdown();
-    try {
-      if (!scheduler.awaitTermination(10, TimeUnit.SECONDS)) {
-        LOG.debug("Executer will be killed.");
-        scheduler.shutdownNow(); // or process/wait until all pending jobs are
-                                 // done
-      }
-      else {
-        LOG.debug("Executer shutdown successfully.");
-      }
-    }
-    catch (InterruptedException e) {
-
-    }
-
   }
 
 }

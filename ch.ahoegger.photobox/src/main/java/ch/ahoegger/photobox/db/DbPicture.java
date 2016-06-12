@@ -8,15 +8,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ch.ahoegger.photobox.dao.NavigationLink;
 import ch.ahoegger.photobox.dao.Picture;
-import ch.ahoegger.photobox.db.util.PreparedStatementExecuter;
+import ch.ahoegger.photobox.db.util.DbStatement;
 import ch.ahoegger.photobox.db.util.SQL;
 
 public class DbPicture implements IDbPicture {
+  protected static Logger LOG = LoggerFactory.getLogger(DbPicture.class);
 
   public static void create(Picture p) {
-    System.out.println("create Picture: " + p.getPathOrignal());
-    new PreparedStatementExecuter<Void>() {
+    LOG.debug("Create picture: {}.", p);
+    new DbStatement<Void>() {
       @Override
       protected String getStatement() {
         StringBuilder sqlBuilder = new StringBuilder();
@@ -25,8 +30,8 @@ public class DbPicture implements IDbPicture {
             .append(TABLE_NAME)
             .append(" ( ")
             .append(
-                SQL.columns(COL_ID, COL_FOLDER_ID, COL_NAME, COL_CAPTURE_DATE, COL_ROTATION, COL_ACTIVE, COL_PATH_ORIGINAL, COL_PATH_SMALL, COL_PATH_MEDIUM,
-                    COL_PATH_LARGE)).append(") ").append(" VALUES ").append("( ").append("?, ?, ?, ?, ?, ?, ?, ?, ?, ?").append(")");
+                SQL.columns(COL_ID, COL_NAME, COL_CAPTURE_DATE, COL_ROTATION, COL_ACTIVE, COL_PATH_ORIGINAL, COL_PATH_SMALL, COL_PATH_MEDIUM,
+                    COL_PATH_LARGE)).append(") ").append(" VALUES ").append("( ").append("?, ?, ?, ?, ?, ?, ?, ?, ?").append(")");
         return sqlBuilder.toString();
       }
 
@@ -34,7 +39,6 @@ public class DbPicture implements IDbPicture {
       protected Void bindAndExecute(Connection connection, PreparedStatement statement) throws SQLException {
         int parameterIndex = 1;
         statement.setLong(parameterIndex++, p.getId());
-        statement.setLong(parameterIndex++, p.getFolderId());
         statement.setString(parameterIndex++, p.getName());
         statement.setDate(parameterIndex++, SQL.toSqlDate(p.getCaptureDate()));
         statement.setInt(parameterIndex++, p.getRotation());
@@ -47,23 +51,40 @@ public class DbPicture implements IDbPicture {
         return null;
       }
     }.execute();
+
+    // create links
+    List<NavigationLink> parents = DbNavigationLink.getParents(p.getFolderId());
+    parents.forEach(l -> {
+      l.setDistance(l.getDistance() + 1);
+      l.setChildId(p.getId());
+    });
+    parents.add(new NavigationLink(p.getFolderId(), p.getId(), 1));
+
+    DbNavigationLink.setParents(parents);
+
   }
 
   public static List<Picture> findByParentId(Long parentId, Boolean active) {
-    return new PreparedStatementExecuter<List<Picture>>() {
+    return new DbStatement<List<Picture>>() {
+
       @Override
       protected String getStatement() {
         StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder
-            .append("SELECT ")
+        sqlBuilder.append("SELECT ")
             .append(
-                SQL.columns(COL_ID, COL_FOLDER_ID, COL_NAME, COL_ACTIVE, COL_CAPTURE_DATE, COL_PATH_LARGE, COL_PATH_MEDIUM, COL_PATH_ORIGINAL, COL_PATH_SMALL, COL_ROTATION))
-            .append(" FROM ").append(TABLE_NAME)
-            .append(" WHERE ").append(COL_FOLDER_ID).append(" = ? ");
+                SQL.columnsAliased(TABLE_ALIAS, COL_ID, COL_NAME, COL_ACTIVE, COL_CAPTURE_DATE, COL_PATH_LARGE, COL_PATH_MEDIUM, COL_PATH_ORIGINAL, COL_PATH_SMALL, COL_ROTATION))
+            .append(", ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_PARENT_ID))
+            .append(" FROM ").append(TABLE_NAME).append(" AS ").append(TABLE_ALIAS);
+        // join parent
+        sqlBuilder.append(" LEFT OUTER JOIN ").append(IDbNavigationLink.TABLE_NAME).append(" AS ").append(IDbNavigationLink.TABLE_ALIAS)
+            .append(" ON ").append(SQL.columnsAliased(TABLE_ALIAS, COL_ID)).append(" = ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_CHILD_ID))
+            .append(" AND ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_DISTANCE)).append(" = 1 ");
+        // conditions
+        sqlBuilder.append(" WHERE ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_PARENT_ID)).append(" = ? ");
         if (active != null) {
-          sqlBuilder.append(" AND ").append(COL_ACTIVE).append(" = ?");
+          sqlBuilder.append(" AND ").append(SQL.columnsAliased(TABLE_ALIAS, COL_ACTIVE)).append(" = ?");
         }
-        sqlBuilder.append(" ORDER BY ").append(COL_CAPTURE_DATE);
+        sqlBuilder.append(" ORDER BY ").append(SQL.columnsAliased(TABLE_ALIAS, COL_NAME, COL_CAPTURE_DATE));
         return sqlBuilder.toString();
       }
 
@@ -75,8 +96,9 @@ public class DbPicture implements IDbPicture {
           statement.setBoolean(parameterIndex++, active);
         }
         ResultSet res = statement.executeQuery();
-        List<Picture> result = new ArrayList<Picture>(res.getFetchSize());
+        List<Picture> result = new ArrayList<Picture>();
         while (res.next()) {
+
           result.add(createPicture(res));
         }
         return result;
@@ -85,15 +107,23 @@ public class DbPicture implements IDbPicture {
   }
 
   public static Picture findByOrignalPath(String orignalPath) {
-    return new PreparedStatementExecuter<Picture>() {
+    return new DbStatement<Picture>() {
       @Override
       protected String getStatement() {
         StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder
-            .append("SELECT ")
+        sqlBuilder.append("SELECT ")
             .append(
-                SQL.columns(COL_ID, COL_FOLDER_ID, COL_NAME, COL_ACTIVE, COL_CAPTURE_DATE, COL_PATH_LARGE, COL_PATH_MEDIUM, COL_PATH_ORIGINAL, COL_PATH_SMALL,
-                    COL_ROTATION)).append(" FROM ").append(TABLE_NAME).append(" WHERE ").append(COL_PATH_ORIGINAL).append(" = ? ");
+                SQL.columnsAliased(TABLE_ALIAS, COL_ID, COL_NAME, COL_ACTIVE, COL_CAPTURE_DATE, COL_PATH_LARGE, COL_PATH_MEDIUM, COL_PATH_ORIGINAL, COL_PATH_SMALL, COL_ROTATION))
+            .append(", ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_PARENT_ID))
+            .append(" FROM ").append(TABLE_NAME).append(" AS ").append(TABLE_ALIAS);
+        // join parent
+        sqlBuilder.append(" LEFT OUTER JOIN ").append(IDbNavigationLink.TABLE_NAME).append(" AS ").append(IDbNavigationLink.TABLE_ALIAS)
+            .append(" ON ").append(SQL.columnsAliased(TABLE_ALIAS, COL_ID)).append(" = ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_CHILD_ID))
+            .append(" AND ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_DISTANCE)).append(" = 1 ");
+        // conditions
+
+        sqlBuilder.append(" WHERE ")
+            .append(SQL.columnsAliased(TABLE_ALIAS, COL_PATH_ORIGINAL)).append(" = ? ");
         return sqlBuilder.toString();
       }
 
@@ -110,47 +140,118 @@ public class DbPicture implements IDbPicture {
   }
 
   public static Picture findById(Long id) {
-    return new PreparedStatementExecuter<Picture>() {
+    if (id == null) {
+      return null;
+    }
+    ArrayList<Long> ids = new ArrayList<Long>();
+    ids.add(id);
+    return findByIds(ids).stream().findFirst().orElse(null);
+  }
+
+  public static List<Picture> findByIds(List<Long> ids) {
+    if (ids == null || ids.isEmpty()) {
+      return null;
+    }
+    return new DbStatement<List<Picture>>() {
       @Override
       protected String getStatement() {
         StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder
-            .append("SELECT ")
+        sqlBuilder.append("SELECT ")
             .append(
-                SQL.columns(COL_ID, COL_FOLDER_ID, COL_NAME, COL_ACTIVE, COL_CAPTURE_DATE, COL_PATH_LARGE, COL_PATH_MEDIUM, COL_PATH_ORIGINAL, COL_PATH_SMALL,
-                    COL_ROTATION)).append(" FROM ").append(TABLE_NAME).append(" WHERE ").append(COL_ID).append(" = ? ");
+                SQL.columnsAliased(TABLE_ALIAS, COL_ID, COL_NAME, COL_ACTIVE, COL_CAPTURE_DATE, COL_PATH_LARGE, COL_PATH_MEDIUM, COL_PATH_ORIGINAL, COL_PATH_SMALL, COL_ROTATION))
+            .append(", ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_PARENT_ID))
+            .append(" FROM ").append(TABLE_NAME).append(" AS ").append(TABLE_ALIAS);
+        // join parent
+        sqlBuilder.append(" LEFT OUTER JOIN ").append(IDbNavigationLink.TABLE_NAME).append(" AS ").append(IDbNavigationLink.TABLE_ALIAS)
+            .append(" ON ").append(SQL.columnsAliased(TABLE_ALIAS, COL_ID)).append(" = ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_CHILD_ID))
+            .append(" AND ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_DISTANCE)).append(" = 1 ");
+        // conditions
+
+        sqlBuilder.append(" WHERE 1 = 1");
+        if (ids.size() == 1) {
+          sqlBuilder.append(" AND ").append(SQL.columnsAliased(TABLE_ALIAS, COL_ID)).append(" = ? ");
+        }
+        else {
+          sqlBuilder.append(" AND ").append(SQL.columnsAliased(TABLE_ALIAS, COL_ID)).append(" IN (")
+              .append(ids.stream().map(id -> "?").collect(Collectors.joining(", "))).append(")");
+        }
         return sqlBuilder.toString();
       }
 
       @Override
-      protected Picture bindAndExecute(Connection connection, PreparedStatement statement) throws SQLException {
-        statement.setLong(1, id);
-        ResultSet res = statement.executeQuery();
-        if (res.next()) {
-          return createPicture(res);
+      protected List<Picture> bindAndExecute(Connection connection, PreparedStatement statement) throws SQLException {
+        int index = 1;
+        for (Long id : ids) {
+          statement.setLong(index++, id);
         }
-        return null;
+        List<Picture> result = new ArrayList<Picture>();
+        ResultSet res = statement.executeQuery();
+        while (res.next()) {
+          result.add(createPicture(res));
+        }
+
+        return result;
       }
     }.execute();
   }
 
   private static Picture createPicture(ResultSet res) throws SQLException {
     return new Picture()
-        .withId(res.getLong(COL_ID))
-        .withFolderId(res.getLong(COL_FOLDER_ID))
-        .withName(res.getString(COL_NAME))
-        .withActive(res.getBoolean(COL_ACTIVE))
-        .withCaptureDate(res.getDate(COL_CAPTURE_DATE))
-        .withPathLarge(res.getString(COL_PATH_LARGE))
-        .withPathMedium(res.getString(COL_PATH_MEDIUM))
-        .withPathOrignal(res.getString(COL_PATH_ORIGINAL))
-        .withPathSmall(res.getString(COL_PATH_SMALL))
-        .withRotation(res.getInt(COL_ROTATION));
+        .withId(res.getLong(1))
+        .withFolderId(res.getLong(10))
+        .withName(res.getString(2))
+        .withActive(res.getBoolean(3))
+        .withCaptureDate(res.getDate(4))
+        .withPathLarge(res.getString(5))
+        .withPathMedium(res.getString(6))
+        .withPathOrignal(res.getString(7))
+        .withPathSmall(res.getString(8))
+        .withRotation(res.getInt(9));
+  }
+
+  public static List<Long> getPictureIds(Long parentId, Boolean active) {
+    return new DbStatement<List<Long>>() {
+
+      @Override
+      protected String getStatement() {
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("SELECT ")
+            .append(
+                SQL.columnsAliased(TABLE_ALIAS, COL_ID))
+            .append(", ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_PARENT_ID))
+            .append(" FROM ").append(TABLE_NAME).append(" AS ").append(TABLE_ALIAS);
+        // join parent
+        sqlBuilder.append(" LEFT OUTER JOIN ").append(IDbNavigationLink.TABLE_NAME).append(" AS ").append(IDbNavigationLink.TABLE_ALIAS)
+            .append(" ON ").append(SQL.columnsAliased(TABLE_ALIAS, COL_ID)).append(" = ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_CHILD_ID));
+        // conditions
+        sqlBuilder.append(" WHERE ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_PARENT_ID)).append(" = ? ");
+        if (active != null) {
+          sqlBuilder.append(" AND ").append(SQL.columnsAliased(TABLE_ALIAS, COL_ACTIVE)).append(" = ?");
+        }
+        sqlBuilder.append(" ORDER BY ").append(SQL.columnsAliased(TABLE_ALIAS, COL_NAME, COL_CAPTURE_DATE));
+        return sqlBuilder.toString();
+      }
+
+      @Override
+      protected List<Long> bindAndExecute(Connection connection, PreparedStatement statement) throws SQLException {
+        int parameterIndex = 1;
+        statement.setLong(parameterIndex++, parentId);
+        if (active != null) {
+          statement.setBoolean(parameterIndex++, active);
+        }
+        ResultSet res = statement.executeQuery();
+        List<Long> result = new ArrayList<Long>();
+        while (res.next()) {
+          result.add(res.getLong(1));
+        }
+        return result;
+      }
+    }.execute();
   }
 
   public static Picture update(Picture picture) {
 
-    new PreparedStatementExecuter<Void>() {
+    new DbStatement<Void>() {
       @Override
       protected String getStatement() {
         List<String> updateValues = new ArrayList<String>();

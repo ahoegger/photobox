@@ -152,4 +152,11 @@ public class Picture implements Serializable {
     m_pathLarge = pathLarge;
   }
 
+  @Override
+  public String toString() {
+    StringBuilder builder = new StringBuilder();
+    builder.append("ID:").append(getId()).append(", Name:").append(getName()).append(", orignalPath:").append(getPathOrignal());
+    return builder.toString();
+  }
+
 }

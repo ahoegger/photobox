@@ -7,20 +7,25 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ch.ahoegger.photobox.dao.Folder;
-import ch.ahoegger.photobox.db.util.PreparedStatementExecuter;
+import ch.ahoegger.photobox.dao.NavigationLink;
+import ch.ahoegger.photobox.db.util.DbStatement;
 import ch.ahoegger.photobox.db.util.SQL;
 
 public class DbFolder implements IDbFolder {
+  protected static Logger LOG = LoggerFactory.getLogger(DbFolder.class);
 
   public static void create(Folder folder) {
     System.out.println("create folder: " + folder);
-    new PreparedStatementExecuter<Void>() {
+    new DbStatement<Void>() {
       @Override
       protected String getStatement() {
         StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("INSERT INTO ").append(TABLE_NAME).append(" ( ").append(SQL.columns(COL_ID, COL_PARENT_ID, COL_NAME, COL_ACTIVE, COL_PATH_ORIGINAL))
-            .append(") ").append(" VALUES ").append("( ").append("?, ?, ?, ?, ?").append(")");
+        sqlBuilder.append("INSERT INTO ").append(TABLE_NAME).append(" ( ").append(SQL.columns(COL_ID, COL_NAME, COL_ACTIVE, COL_PATH_ORIGINAL))
+            .append(") ").append(" VALUES ").append("( ").append("?,  ?, ?, ?").append(")");
         return sqlBuilder.toString();
       }
 
@@ -28,7 +33,6 @@ public class DbFolder implements IDbFolder {
       protected Void bindAndExecute(Connection connection, PreparedStatement statement) throws SQLException {
         int parameterIndex = 1;
         statement.setLong(parameterIndex++, folder.getId().longValue());
-        statement.setLong(parameterIndex++, folder.getParentId().longValue());
         statement.setString(parameterIndex++, folder.getName());
         statement.setBoolean(parameterIndex++, folder.isActive());
         statement.setString(parameterIndex++, folder.getPathOrignal());
@@ -36,15 +40,32 @@ public class DbFolder implements IDbFolder {
         return null;
       }
     }.execute();
+
+    // create links
+    List<NavigationLink> parents = DbNavigationLink.getParents(folder.getParentId());
+    parents.forEach(l -> {
+      l.setDistance(l.getDistance() + 1);
+      l.setChildId(folder.getId());
+    });
+    parents.add(new NavigationLink(folder.getParentId(), folder.getId(), 1));
+
+    DbNavigationLink.setParents(parents);
+
   }
 
   public static Folder findById(Long id) {
-    return new PreparedStatementExecuter<Folder>() {
+    LOG.debug("find folder by id '{}'.", id);
+    return new DbStatement<Folder>() {
       @Override
       protected String getStatement() {
         StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("SELECT ").append(SQL.columns(COL_ID, COL_PARENT_ID, COL_NAME, COL_ACTIVE, COL_PATH_ORIGINAL))
-            .append(" FROM ").append(TABLE_NAME)
+        sqlBuilder.append("SELECT ").append(SQL.columnsAliased(TABLE_ALIAS, COL_ID, COL_NAME, COL_ACTIVE, COL_PATH_ORIGINAL))
+            .append(", ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_PARENT_ID))
+            .append(" FROM ").append(TABLE_NAME).append(" AS ").append(TABLE_ALIAS);
+        // join navigation links for parent
+        sqlBuilder.append(" LEFT OUTER JOIN ").append(IDbNavigationLink.TABLE_NAME).append(" AS ").append(IDbNavigationLink.TABLE_ALIAS)
+            .append(" ON ").append(SQL.columnsAliased(TABLE_ALIAS, COL_ID)).append(" = ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_CHILD_ID))
+            .append(" AND ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_DISTANCE)).append(" = 1")
             .append(" WHERE ").append(COL_ID).append(" = ? ");
         return sqlBuilder.toString();
       }
@@ -54,11 +75,7 @@ public class DbFolder implements IDbFolder {
         statement.setLong(1, id);
         ResultSet res = statement.executeQuery();
         if (res.next()) {
-          return new Folder().withId(res.getLong(COL_ID))
-              .withParentId(res.getLong(COL_PARENT_ID))
-              .withName(res.getString(COL_NAME))
-              .withActive(res.getBoolean(COL_ACTIVE))
-              .withPathOrignal(res.getString(COL_PATH_ORIGINAL));
+          return createFolder(res);
         }
         return null;
       }
@@ -66,13 +83,22 @@ public class DbFolder implements IDbFolder {
   }
 
   public static List<Folder> findByParentId(Long parentId, Boolean active) {
-    return new PreparedStatementExecuter<List<Folder>>() {
+    LOG.debug("find folder by parentId '{}'.", parentId);
+
+    return new DbStatement<List<Folder>>() {
       @Override
       protected String getStatement() {
         StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("SELECT ").append(SQL.columns(COL_ID, COL_PARENT_ID, COL_NAME, COL_ACTIVE, COL_PATH_ORIGINAL))
-            .append(" FROM ").append(TABLE_NAME)
-            .append(" WHERE ").append(COL_PARENT_ID).append(" = ? ");
+        sqlBuilder.append("SELECT ").append(SQL.columnsAliased(TABLE_ALIAS, COL_ID, COL_NAME, COL_ACTIVE, COL_PATH_ORIGINAL))
+            .append(", ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_PARENT_ID))
+            .append(" FROM ").append(TABLE_NAME).append(" AS ").append(TABLE_ALIAS);
+        // join with navigation for parent
+        sqlBuilder.append(" LEFT OUTER JOIN ").append(IDbNavigationLink.TABLE_NAME).append(" AS ").append(IDbNavigationLink.TABLE_ALIAS)
+            .append(" ON ").append(SQL.columnsAliased(TABLE_ALIAS, COL_ID)).append(" = ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_CHILD_ID))
+            .append(" AND ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_DISTANCE)).append(" = 1");
+
+        // conditions
+        sqlBuilder.append(" WHERE ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_PARENT_ID)).append(" = ? ");
         if (active != null) {
           sqlBuilder.append(" AND ").append(COL_ACTIVE).append(" = ?");
         }
@@ -90,11 +116,7 @@ public class DbFolder implements IDbFolder {
         ResultSet res = statement.executeQuery();
         List<Folder> result = new ArrayList<Folder>(res.getFetchSize());
         while (res.next()) {
-          result.add(new Folder().withId(res.getLong(COL_ID))
-              .withParentId(res.getLong(COL_PARENT_ID))
-              .withName(res.getString(COL_NAME))
-              .withActive(res.getBoolean(COL_ACTIVE))
-              .withPathOrignal(res.getString(COL_PATH_ORIGINAL)));
+          result.add(createFolder(res));
         }
         return result;
       }
@@ -102,13 +124,20 @@ public class DbFolder implements IDbFolder {
   }
 
   public static Folder findByOrignalPath(String orignalPath) {
-    return new PreparedStatementExecuter<Folder>() {
+    LOG.debug("find folder by originalPath '{}'.", orignalPath);
+    return new DbStatement<Folder>() {
       @Override
       protected String getStatement() {
         StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("SELECT ").append(SQL.columns(COL_ID, COL_PARENT_ID, COL_NAME, COL_ACTIVE, COL_PATH_ORIGINAL))
-            .append(" FROM ").append(TABLE_NAME)
-            .append(" WHERE ").append(COL_PATH_ORIGINAL).append(" = ? ");
+        sqlBuilder.append("SELECT ").append(SQL.columnsAliased(TABLE_ALIAS, COL_ID, COL_NAME, COL_ACTIVE, COL_PATH_ORIGINAL))
+            .append(", ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_PARENT_ID))
+            .append(" FROM ").append(TABLE_NAME).append(" AS ").append(TABLE_ALIAS);
+        // join with navigation for parent
+        sqlBuilder.append(" LEFT OUTER JOIN ").append(IDbNavigationLink.TABLE_NAME).append(" AS ").append(IDbNavigationLink.TABLE_ALIAS)
+            .append(" ON ").append(SQL.columnsAliased(TABLE_ALIAS, COL_ID)).append(" = ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_CHILD_ID))
+            .append(" AND ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_DISTANCE)).append(" = 1");
+
+        sqlBuilder.append(" WHERE ").append(SQL.columnsAliased(TABLE_ALIAS, COL_PATH_ORIGINAL)).append(" LIKE ? ");
         return sqlBuilder.toString();
       }
 
@@ -117,14 +146,18 @@ public class DbFolder implements IDbFolder {
         statement.setString(1, orignalPath);
         ResultSet res = statement.executeQuery();
         if (res.next()) {
-          return new Folder().withId(res.getLong(COL_ID))
-              .withParentId(res.getLong(COL_PARENT_ID))
-              .withName(res.getString(COL_NAME))
-              .withActive(res.getBoolean(COL_ACTIVE))
-              .withPathOrignal(res.getString(COL_PATH_ORIGINAL));
+          return createFolder(res);
         }
         return null;
       }
     }.execute();
+  }
+
+  private static Folder createFolder(ResultSet res) throws SQLException {
+    return new Folder().withId(res.getLong(1))
+        .withParentId(res.getLong(5))
+        .withName(res.getString(2))
+        .withActive(res.getBoolean(3))
+        .withPathOrignal(res.getString(4));
   }
 }

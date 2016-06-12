@@ -10,49 +10,64 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Stack;
 
+import org.quartz.DisallowConcurrentExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.ahoegger.photobox.IProperties;
 import ch.ahoegger.photobox.PhotoUtility;
+import ch.ahoegger.photobox.configuration.Configuration;
 import ch.ahoegger.photobox.dao.Folder;
 import ch.ahoegger.photobox.dao.Picture;
 import ch.ahoegger.photobox.db.DbFolder;
 import ch.ahoegger.photobox.db.DbPicture;
 import ch.ahoegger.photobox.db.DbSequence;
+import ch.ahoegger.photobox.db.util.DbConnection;
+import ch.ahoegger.photobox.quarz.AbstractCanceableJob;
 
-public class SyncImagesTask implements Runnable {
-  protected static Logger LOG = LoggerFactory.getLogger(SyncImagesTask.class);
+/**
+ * <h3>{@link ScaleJob}</h3>
+ *
+ * @author aho
+ */
+@DisallowConcurrentExecution
+public class ScaleJob extends AbstractCanceableJob {
+  private static final Logger LOG = LoggerFactory.getLogger(ScaleJob.class);
 
-  private Path m_orignalDirectory;
-  private PathMatcher m_imageMatcher = FileSystems.getDefault().getPathMatcher("glob:*.{jpg,gif,png}");
-  private Path m_workingDirectory;
-
-  public SyncImagesTask(Path orignalDirectory, Path workingDirectory) {
-    m_orignalDirectory = orignalDirectory;
-    m_workingDirectory = workingDirectory;
-
-  }
+  private Path m_orignalDirectory = Configuration.getOriginalDirectory();
+  private Path m_workingDirectory = Configuration.getWorkingDirectory();
+  private PathMatcher m_imageMatcher = FileSystems.getDefault().getPathMatcher("glob:**.{jpg,JPG}");
 
   @Override
-  public void run() {
+  protected void execute(IMonitor monitor) {
+
     LOG.debug("Start sync image task. original:'{}', working:{}", m_orignalDirectory, m_workingDirectory);
-    m_imageMatcher = FileSystems.getDefault().getPathMatcher("glob:**.{jpg,JPG}");
     try {
       Files.walkFileTree(m_orignalDirectory, new SimpleFileVisitor<Path>() {
         private Stack<Folder> m_parents = new Stack<Folder>();
 
         @Override
         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+          if (monitor.isCanceled()) {
+            return FileVisitResult.TERMINATE;
+          }
           LOG.debug("Visit file '{}'", file);
           if (m_imageMatcher.matches(file)) {
-            scaleImage(file, getParentId());
+            try {
+              scaleImage(file, getParentId());
+            }
+            catch (Exception e) {
+              LOG.error(String.format("Could not scale image '%s'.", file), e);
+            }
           }
           return FileVisitResult.CONTINUE;
         }
 
         @Override
         public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+          if (monitor.isCanceled()) {
+            return FileVisitResult.TERMINATE;
+          }
           LOG.debug("Pre visit directory '{}'", dir);
           Folder folder = syncDirectory(dir, getParentId());
           m_parents.push(folder);
@@ -61,6 +76,9 @@ public class SyncImagesTask implements Runnable {
 
         @Override
         public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+          if (monitor.isCanceled()) {
+            return FileVisitResult.TERMINATE;
+          }
           LOG.debug("Post visit directory '{}'", dir);
           m_parents.pop();
           return FileVisitResult.CONTINUE;
@@ -96,7 +114,19 @@ public class SyncImagesTask implements Runnable {
         .withParentId(parentId)
         .withName(relPath.getName(relPath.getNameCount() - 1).toString())
         .withActive(true).withPathOrignal(PhotoUtility.pathToString(relPath, "/"));
-    DbFolder.create(folder);
+
+    try {
+      DbFolder.create(folder);
+      DbConnection.commit();
+    }
+    catch (Exception e) {
+      DbConnection.rollback();
+      throw e;
+    }
+    finally {
+      DbConnection.release();
+    }
+
     return folder;
 
   }
@@ -137,7 +167,18 @@ public class SyncImagesTask implements Runnable {
         .withPathMedium(PhotoUtility.pathToString(m_workingDirectory.relativize(mobileImg), "/"))
         .withPathLarge(PhotoUtility.pathToString(m_workingDirectory.relativize(desktopImg), "/"));
 
-    DbPicture.create(picture);
+    try {
+      DbPicture.create(picture);
+      DbConnection.commit();
+    }
+    catch (Exception e) {
+      DbConnection.rollback();
+      throw e;
+    }
+    finally {
+      DbConnection.release();
+    }
+
     return picture;
   }
 }

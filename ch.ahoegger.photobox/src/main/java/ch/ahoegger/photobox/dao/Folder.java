@@ -18,6 +18,8 @@ public class Folder implements Serializable {
   private List<Picture> m_pictures;
 
   private String m_pathOrignal;
+  private int m_totalPictureCount;
+  private List<Picture> m_previewPictures;
 
   public Long getId() {
     return m_id;
@@ -86,6 +88,22 @@ public class Folder implements Serializable {
 
   public List<Picture> getPictures() {
     return m_pictures;
+  }
+
+  public void setTotalPictureCount(int totalPictureCount) {
+    m_totalPictureCount = totalPictureCount;
+  }
+
+  public int getTotalPictureCount() {
+    return m_totalPictureCount;
+  }
+
+  public void setPreviewPictures(List<Picture> previewPictures) {
+    m_previewPictures = previewPictures;
+  }
+
+  public List<Picture> getPreviewPictures() {
+    return m_previewPictures;
   }
 
   @Override
