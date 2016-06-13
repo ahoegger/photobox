@@ -22,19 +22,9 @@
         if ($stateParams.itemId) {
           $timeout(function() {
             _highlight($stateParams.itemId);
-          });
+          }, 200);
 
         }
-        // self.directories = response.children.filter(function(res) {
-        // return res.folder;
-        // });
-        // self.files = response.children.filter(function(res) {
-        // return !res.folder;
-        // }).map(function(res) {
-        // res.path = res.name;
-        // return res;
-        // });
-        console.log(response);
       });
 
     })();

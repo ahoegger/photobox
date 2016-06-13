@@ -30,16 +30,28 @@
         $image = angular.element($element[0].getElementsByClassName('img-preview'));
         $window = angular.element(window);
         $scope.imageUrl = $filter('imageSizeFilter')($scope.image.id, $element[0].getBoundingClientRect());
+        
+        // initial height = width
+        var containerSize = $imageContainer[0].getBoundingClientRect().width;
+        $imageContainer.css('height', containerSize);
+        $scope.$watch(function(){
+          return $imageContainer[0].getBoundingClientRect().width;
+        }, function(newValue, oldValue){
+          console.log('changed: ',oldValue, newValue);
+          if(newValue && newValue !== oldValue){
+            $imageContainer.css('height', newValue);            
+          }
+        }, true);
+
+        
         if ($scope.imageSelection) {
           $scope.clickCallback = function(event) {
-            console.log('clicked!!!');
             $scope.imageSelection($scope.image, event);
           }
         }
 
         if($scope.image.rotation){
           $image.css('transform', 'rotate('+$scope.image.rotation+'deg)');
-          console.log('rotation: ',$scope.image.rotation );
         }
 
         // listeners
