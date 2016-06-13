@@ -1,8 +1,9 @@
 
-<div class="content">
+<div id="photobox-folder" class="content">
 	<div class="folders">
 		<photobox-folder-preview class="clickable"
 			data-ng-repeat="folder in folderViewController.folder.subFolders"
+			id="photobox-id-{{folder.id}}"
 			ng-click="folderViewController.onFolderSelection(folder)"
 			folder="folder"> </photobox-folder-preview>
 	</div>
@@ -12,6 +13,7 @@
 	<div class="images">
 		<photobox-image-preview
 			ng-repeat="image in folderViewController.folder.pictures"
+			id="photobox-id-{{image.id}}"
 			image-src="{{image.links | imageLinkFilter:'Preview'}}" image="image"
 			image-selection=folderViewController.onImageSelection></photobox-image-preview>
 		<!-- 	<img ng-repeat="image in folderViewController.files" -->

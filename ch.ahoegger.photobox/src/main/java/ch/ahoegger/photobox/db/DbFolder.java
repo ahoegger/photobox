@@ -19,6 +19,10 @@ public class DbFolder implements IDbFolder {
   protected static Logger LOG = LoggerFactory.getLogger(DbFolder.class);
 
   public static void create(Folder folder) {
+    if (folder.getId() == null) {
+      folder.withId(DbSequence.getNextKey());
+    }
+    LOG.debug("Create folder '{}'.", folder);
     System.out.println("create folder: " + folder);
     new DbStatement<Void>() {
       @Override

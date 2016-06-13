@@ -1,57 +1,62 @@
 
 .content{
   .navigation-padding-top();
+
   >.folders{
 
-  //   .margin-horizontal-media();
-    
     photobox-folder-preview{
       .margin-vertical-media();
       overflow: auto;
+      
+      
+      &.highlight {
+        animation: borderMarker 2.82s cubic-bezier(.36,.07,.19,.97) both;
+      }
+      
       .responsive-small( {
         min-height: 30px;
-  	});
-  	.responsive-medium( {
-        min-height: 50px;
-  	});
-  	.responsive-large( {
-        min-height: 100px;
-  	});
-      
-      
+    	});
+    	.responsive-medium( {
+          min-height: 50px;
+    	});
+    	.responsive-large( {
+          min-height: 100px;
+    	});
+        
+        
       .folder-title{
-      .responsive-small( {
+        .responsive-small({
           margin: 2px;
         });
-        
-        .responsive-medium( {
+         
+        .responsive-medium({
           margin: 5px;
         });
-        
-        .responsive-large( {
+          
+        .responsive-large({
           margin: 5px;
         });
       }
-      
+        
       photobox-image-preview {
         float: left;
-          > .img-preview-container .menu{
-            display: none;
-          }
-       
         
+        > .img-preview-container .menu{
+          display: none;
+        }
+             
         .responsive-small( {
           width: 60px;
           height: 60px;
           margin: 2px;
         });
-        
+          
         .responsive-medium( {
           width: 100px;
           height: 100px;
           margin: 5px;
         });
-        
+          
         .responsive-large( {
           width: 200px;
           height: 200px;
@@ -66,6 +71,17 @@
     
     photobox-image-preview {
       float: left;
+      
+      &.highlight {
+      >div{
+        animation: zoomInOut 2.82s cubic-bezier(.36,.07,.19,.97) both;
+      }
+/*       transform: translate3d(0, 0, 0); */
+/*       backface-visibility: hidden; */
+/*       perspective: 1000px; */
+/*       box-shadow: inset 0px 0px 13px 0px rgba(26,19,43,1); */
+/*         box-shadow: 0px 0px 13px 0px rgba(26,19,43,1); */
+      }
     }
     
     .responsive-small( {

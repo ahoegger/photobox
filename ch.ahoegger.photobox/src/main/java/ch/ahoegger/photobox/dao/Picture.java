@@ -9,11 +9,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class Picture implements Serializable {
   private static final long serialVersionUID = 1L;
 
-  private long m_id;
+  private Long m_id;
 
   private String m_name;
   private Date m_captureDate;
-  private long m_folderId;
+  private Long m_folderId;
   private Integer m_rotation;
   private Boolean m_active;
   private String m_pathOrignal;
@@ -21,11 +21,11 @@ public class Picture implements Serializable {
   private String m_pathMedium;
   private String m_pathLarge;
 
-  public long getId() {
+  public Long getId() {
     return m_id;
   }
 
-  public Picture withId(long id) {
+  public Picture withId(Long id) {
     m_id = id;
     return this;
   }
@@ -48,11 +48,11 @@ public class Picture implements Serializable {
     return this;
   }
 
-  public long getFolderId() {
+  public Long getFolderId() {
     return m_folderId;
   }
 
-  public Picture withFolderId(long folderId) {
+  public Picture withFolderId(Long folderId) {
     m_folderId = folderId;
     return this;
   }

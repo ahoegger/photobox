@@ -1,0 +1,39 @@
+@keyframes zoomInOut {
+  10%, 90% {
+    transform: scale(0.9);
+  }
+  
+  20%, 80% {
+    transform: scale(1.1);
+  }
+
+  30%, 50%, 70% {
+    
+    transform: scale(0.8);
+  }
+
+  40%, 60% {
+    transform: scale(1.2);
+    
+  }
+}
+
+@keyframes borderMarker{
+  10%, 90% {
+    box-shadow: inset 0px 0px 5px 0px @background-color-picture-view-full-screen;
+  }
+  
+  20%, 80% {
+    box-shadow: inset 0px 0px 10px 0px @background-color-picture-view-full-screen;
+  }
+
+  30%, 50%, 70% {
+    
+    box-shadow: inset 0px 0px 0px 0px @background-color-picture-view-full-screen;
+  }
+
+  40%, 60% {
+      box-shadow: inset 0px 0px 10px 0px @background-color-picture-view-full-screen;
+    
+  }
+}

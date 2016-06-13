@@ -21,7 +21,6 @@ import ch.ahoegger.photobox.dao.Folder;
 import ch.ahoegger.photobox.dao.Picture;
 import ch.ahoegger.photobox.db.DbFolder;
 import ch.ahoegger.photobox.db.DbPicture;
-import ch.ahoegger.photobox.db.DbSequence;
 import ch.ahoegger.photobox.db.util.DbConnection;
 import ch.ahoegger.photobox.quarz.AbstractCanceableJob;
 
@@ -110,7 +109,6 @@ public class ScaleJob extends AbstractCanceableJob {
       return folder;
     }
     folder = new Folder()
-        .withId(DbSequence.getNextKey())
         .withParentId(parentId)
         .withName(relPath.getName(relPath.getNameCount() - 1).toString())
         .withActive(true).withPathOrignal(PhotoUtility.pathToString(relPath, "/"));
@@ -156,7 +154,6 @@ public class ScaleJob extends AbstractCanceableJob {
       new ScaleTask(original, desktopImg, IProperties.RESOLUTION_LARGE).scale();
     }
     picture = new Picture()
-        .withId(DbSequence.getNextKey())
         .withFolderId(parentId)
         .withName(original.getFileName().toString())
         .withActive(true)

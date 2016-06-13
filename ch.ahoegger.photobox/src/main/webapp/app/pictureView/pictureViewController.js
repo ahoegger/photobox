@@ -31,7 +31,8 @@
     // callback
     self.navigateFolder = function(){
       $state.go('folderState', {
-        id : self.folder.id
+        id : self.folder.id,
+        itemId : self.folder.pictures[self.index].id
       });
     };
     self.handleImgClick = function(){

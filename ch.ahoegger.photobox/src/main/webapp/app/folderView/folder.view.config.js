@@ -10,6 +10,9 @@
     var folderState = {
         name: 'folderState',
         url : '/folder?id',
+        params: {
+          itemId: undefined,
+        },
         views: {
             "main": {
               templateUrl : 'app/folderView/folder.view.html',

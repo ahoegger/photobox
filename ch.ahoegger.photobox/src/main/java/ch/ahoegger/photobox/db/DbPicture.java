@@ -20,6 +20,9 @@ public class DbPicture implements IDbPicture {
   protected static Logger LOG = LoggerFactory.getLogger(DbPicture.class);
 
   public static void create(Picture p) {
+    if (p.getId() == null) {
+      p.withId(DbSequence.getNextKey());
+    }
     LOG.debug("Create picture: {}.", p);
     new DbStatement<Void>() {
       @Override
