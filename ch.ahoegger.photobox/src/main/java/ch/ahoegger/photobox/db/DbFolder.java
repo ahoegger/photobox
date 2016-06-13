@@ -18,7 +18,7 @@ import ch.ahoegger.photobox.db.util.SQL;
 public class DbFolder implements IDbFolder {
   protected static Logger LOG = LoggerFactory.getLogger(DbFolder.class);
 
-  public static void create(Folder folder) {
+  public static Folder create(Folder folder) {
     if (folder.getId() == null) {
       folder.withId(DbSequence.getNextKey());
     }
@@ -54,6 +54,7 @@ public class DbFolder implements IDbFolder {
     parents.add(new NavigationLink(folder.getParentId(), folder.getId(), 1));
 
     DbNavigationLink.setParents(parents);
+    return folder;
 
   }
 

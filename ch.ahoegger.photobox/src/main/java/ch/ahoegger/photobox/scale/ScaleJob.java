@@ -1,13 +1,11 @@
 package ch.ahoegger.photobox.scale;
 
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystems;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Stack;
 
 import org.quartz.DisallowConcurrentExecution;
@@ -37,65 +35,121 @@ public class ScaleJob extends AbstractCanceableJob {
   private Path m_workingDirectory = Configuration.getWorkingDirectory();
   private PathMatcher m_imageMatcher = FileSystems.getDefault().getPathMatcher("glob:**.{jpg,JPG}");
 
+  private Stack<DirectoryDesc> m_directories = new Stack<DirectoryDesc>();
+
   @Override
   protected void execute(IMonitor monitor) {
 
     LOG.info("Start sync image task. original:'{}', working:{}", m_orignalDirectory, m_workingDirectory);
     try {
-      Files.walkFileTree(m_orignalDirectory, new SimpleFileVisitor<Path>() {
-        private Stack<Folder> m_parents = new Stack<Folder>();
+      try {
+        visitDirectory(m_orignalDirectory, 0l);
+      }
+      catch (IOException e) {
+        LOG.error(String.format("Could not synchonize root directory '%s'.", m_orignalDirectory), e);
+      }
 
-        @Override
-        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-          if (monitor.isCanceled()) {
-            return FileVisitResult.TERMINATE;
-          }
-          LOG.debug("Visit file '{}'", file);
-          if (m_imageMatcher.matches(file)) {
-            try {
-              scaleImage(file, getParentId());
-            }
-            catch (Exception e) {
-              LOG.error(String.format("Could not scale image '%s'.", file), e);
-            }
-          }
-          return FileVisitResult.CONTINUE;
+      while (!m_directories.isEmpty()) {
+        DirectoryDesc current = m_directories.pop();
+        Folder folder = syncDirectory(current.getPath(), current.getParentId());
+        try {
+          visitDirectory(current.getPath(), folder.getId());
         }
-
-        @Override
-        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-          if (monitor.isCanceled()) {
-            return FileVisitResult.TERMINATE;
-          }
-          LOG.debug("Pre visit directory '{}'", dir);
-          Folder folder = syncDirectory(dir, getParentId());
-          m_parents.push(folder);
-          return FileVisitResult.CONTINUE;
+        catch (IOException e) {
+          LOG.error(String.format("Could not synchonize directory '%s'.", current), e);
         }
-
-        @Override
-        public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-          if (monitor.isCanceled()) {
-            return FileVisitResult.TERMINATE;
-          }
-          LOG.debug("Post visit directory '{}'", dir);
-          m_parents.pop();
-          return FileVisitResult.CONTINUE;
-        }
-
-        private long getParentId() {
-          if (m_parents.isEmpty()) {
-            return 0l;
-          }
-          return m_parents.peek().getId();
-        }
-
-      });
+      }
     }
-    catch (Exception e1) {
-      LOG.error("Could not scale images.", e1);
+    catch (Exception e) {
+      LOG.error("Could not scale images.", e);
     }
     LOG.info("End sync image task. original:'{}', working:{}", m_orignalDirectory, m_workingDirectory);
+//    try {
+//      Files.walkFileTree(m_orignalDirectory, new SimpleFileVisitor<Path>() {
+//        private Stack<Folder> m_parents = new Stack<Folder>();
+//
+//        @Override
+//        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+//          if (monitor.isCanceled()) {
+//            return FileVisitResult.TERMINATE;
+//          }
+//          LOG.debug("Visit file '{}'", file);
+//          if (m_imageMatcher.matches(file)) {
+//            try {
+//              scaleImage(file, getParentId());
+//            }
+//            catch (Exception e) {
+//              LOG.error(String.format("Could not scale image '%s'.", file), e);
+//            }
+//          }
+//          return FileVisitResult.CONTINUE;
+//        }
+//
+//        @Override
+//        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+//          if (monitor.isCanceled()) {
+//            return FileVisitResult.TERMINATE;
+//          }
+//          LOG.debug("Pre visit directory '{}'", dir);
+//          Folder folder = syncDirectory(dir, getParentId());
+//          m_parents.push(folder);
+//          return FileVisitResult.CONTINUE;
+//        }
+//
+//        @Override
+//        public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+//          if (monitor.isCanceled()) {
+//            return FileVisitResult.TERMINATE;
+//          }
+//          LOG.debug("Post visit directory '{}'", dir);
+//          m_parents.pop();
+//          return FileVisitResult.CONTINUE;
+//        }
+//
+//        private long getParentId() {
+//          if (m_parents.isEmpty()) {
+//            return 0l;
+//          }
+//          return m_parents.peek().getId();
+//        }
+//
+//      });
+//    }
+//    catch (Exception e1) {
+//      LOG.error("Could not scale images.", e1);
+//    }
+//    LOG.info("End sync image task. original:'{}', working:{}", m_orignalDirectory, m_workingDirectory);
+  }
+
+  protected void visitDirectory(Path directory, Long id) throws IOException {
+    if (!Files.isDirectory(directory)) {
+      throw new IllegalArgumentException(String.format("'%s' is not a directory.", directory));
+    }
+    DirectoryStream<Path> directoryStream = null;
+    try {
+      directoryStream = Files.newDirectoryStream(directory);
+      directoryStream.forEach(p -> {
+        if (Files.isDirectory(p)) {
+          m_directories.push(new DirectoryDesc(p, id));
+        }
+          else {
+            if (m_imageMatcher.matches(p)) {
+              try {
+                scaleImage(p, id);
+              }
+              catch (Exception e) {
+                LOG.error(String.format("Could not scale image '%s'.", p), e);
+              }
+            }
+          }
+        });
+    }
+    finally {
+      if (directoryStream != null) {
+        directoryStream.close();
+      }
+    }
+
   }
 
   private Folder syncDirectory(Path original, Long parentId) {
@@ -114,7 +168,7 @@ public class ScaleJob extends AbstractCanceableJob {
         .withActive(true).withPathOrignal(PhotoUtility.pathToString(relPath, "/"));
 
     try {
-      DbFolder.create(folder);
+      folder = DbFolder.create(folder);
       DbConnection.commit();
     }
     catch (Exception e) {
@@ -130,7 +184,6 @@ public class ScaleJob extends AbstractCanceableJob {
   }
 
   private Picture scaleImage(Path original, Long parentId) {
-    LOG.debug("Scale image '{}'.", original);
 
     Path relPath = m_orignalDirectory.relativize(original);
     Picture picture = DbPicture.findByOrignalPath(PhotoUtility.pathToString(relPath, "/"));
@@ -138,6 +191,7 @@ public class ScaleJob extends AbstractCanceableJob {
       return picture;
     }
     // scale preview
+    LOG.debug("Scale image '{}'.", original);
 
     Path previewImg = m_workingDirectory.resolve(IProperties.ImageType.Small.toString()).resolve(relPath);
     if (!Files.exists(previewImg)) {
@@ -177,5 +231,30 @@ public class ScaleJob extends AbstractCanceableJob {
     }
 
     return picture;
+  }
+
+  public static class DirectoryDesc {
+    private Long m_parentId;
+    private Path m_path;
+
+    public DirectoryDesc(Path path, Long parentId) {
+      m_path = path;
+      m_parentId = parentId;
+    }
+
+    public Long getParentId() {
+      return m_parentId;
+    }
+
+    public Path getPath() {
+      return m_path;
+    }
+
+    @Override
+    public String toString() {
+      StringBuilder builder = new StringBuilder();
+      builder.append("path:").append(getPath()).append(", parentid:").append(getParentId());
+      return builder.toString();
+    }
   }
 }

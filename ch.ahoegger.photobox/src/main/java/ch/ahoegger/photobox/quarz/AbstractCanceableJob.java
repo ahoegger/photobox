@@ -19,6 +19,7 @@ public abstract class AbstractCanceableJob implements Job {
   @Override
   public void execute(JobExecutionContext context) throws JobExecutionException {
     try {
+
       context.getScheduler().getListenerManager().addSchedulerListener(m_schedulerListener);
       execute(new IMonitor() {
 
