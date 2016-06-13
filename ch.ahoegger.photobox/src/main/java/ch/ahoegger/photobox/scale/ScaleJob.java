@@ -40,7 +40,7 @@ public class ScaleJob extends AbstractCanceableJob {
   @Override
   protected void execute(IMonitor monitor) {
 
-    LOG.debug("Start sync image task. original:'{}', working:{}", m_orignalDirectory, m_workingDirectory);
+    LOG.info("Start sync image task. original:'{}', working:{}", m_orignalDirectory, m_workingDirectory);
     try {
       Files.walkFileTree(m_orignalDirectory, new SimpleFileVisitor<Path>() {
         private Stack<Folder> m_parents = new Stack<Folder>();
@@ -95,7 +95,7 @@ public class ScaleJob extends AbstractCanceableJob {
     catch (Exception e1) {
       LOG.error("Could not scale images.", e1);
     }
-    LOG.debug("End sync image task. original:'{}', working:{}", m_orignalDirectory, m_workingDirectory);
+    LOG.info("End sync image task. original:'{}', working:{}", m_orignalDirectory, m_workingDirectory);
   }
 
   private Folder syncDirectory(Path original, Long parentId) {

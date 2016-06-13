@@ -79,6 +79,16 @@
 		<listener-class>org.quartz.ee.servlet.QuartzInitializerListener</listener-class>
 	</listener>
 
+	<!-- FILTERS -->
+	<filter>
+		<filter-name>SqlTransactionFilter</filter-name>
+		<filter-class>ch.ahoegger.photobox.db.util.SqlTransactionFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>SqlTransactionFilter</filter-name>
+		<url-pattern>/rest/*</url-pattern>
+	</filter-mapping>
+
 	<!-- SERVLETS -->
 	<servlet>
 		<servlet-name>static</servlet-name>
