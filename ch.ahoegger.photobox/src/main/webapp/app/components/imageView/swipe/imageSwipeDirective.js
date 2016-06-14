@@ -277,15 +277,15 @@
       }
 
       function _touchStart(event) {
-        event.preventDefault();
-        event.stopPropagation();
+        // event.preventDefault();
+        // event.stopPropagation();
         console.log('touch start!!!');
         var touch = event.originalEvent.touches[0];
         _dragStart(touch.pageX);
       }
       function _mouseDown(event) {
-        event.preventDefault();
-        event.stopPropagation();
+        // event.preventDefault();
+        // event.stopPropagation();
         console.log('mouse down!!!');
         _dragStart(event.pageX);
       }
@@ -304,13 +304,13 @@
       }
 
       function _mouseMove(event) {
-        event.preventDefault();
-        event.stopPropagation();
+        // event.preventDefault();
+        // event.stopPropagation();
         _move(event.pageX);
       }
       function _touchMove(event) {
-        event.preventDefault();
-        event.stopPropagation();
+        // event.preventDefault();
+        // event.stopPropagation();
         var touch = event.originalEvent.touches[0];
         _move(touch.pageX);
 
@@ -318,16 +318,20 @@
       function _move(xPosition) {
         swipeCurrentX = xPosition;
         var deltaX = swipeCurrentX - swipeStartX;
-        if (deltaX < 0 && $images[2]) {
-          _updatePositions(deltaX);
-        } else if (deltaX > 0 && $images[0]) {
-          _updatePositions(deltaX);
+        if (deltaX < 0) {
+          if (!$images[2]) {
+            deltaX = deltaX / 5;
+          }
+        } else if (deltaX > 0) {
+          if (!$images[0]) {
+            deltaX = deltaX / 5;
+          }
         }
-        console.log('moved: ', xPosition, swipeStartX);
+        _updatePositions(deltaX);
       }
       function _moveEnd(event) {
-        event.preventDefault();
-        event.stopPropagation();
+        // event.preventDefault();
+        // event.stopPropagation();
         if (!swiping) {
           return;
         }
@@ -353,18 +357,20 @@
 
       function _snap(deltaX) {
         var elementWidth = $container[0].getBoundingClientRect().width;
-        if (Math.abs(deltaX) > elementWidth * 0.30) {
-          if (deltaX > 0) {
+        if (Math.abs(deltaX) > elementWidth * 0.25) {
+          if (deltaX > 0 && $images[0]) {
             _snapPrevious();
-          } else {
+          } else if (deltaX < 0 && $images[2]) {
             _snapNext();
+          } else {
+            _updatePositions(0);
           }
         } else {
           _updatePositions(0);
-          if (Math.abs(deltaX) < 10) {
-            $scope.imageSelection($scope.files[currentIndex]);
-
-          }
+          // if (Math.abs(deltaX) < 10) {
+          // $scope.imageSelection($scope.files[currentIndex]);
+          //
+          // }
         }
       }
 

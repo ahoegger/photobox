@@ -1,17 +1,18 @@
+
 .responsive-small(@rules) {
-  @media (max-width: 400px) {
+  @media (max-width: @media-breakpoint-small-max) {
     @rules();
   }
 }
 
 .responsive-medium(@rules) {
-  @media (min-width: 401px) and (max-width: 1000px) {
+  @media (min-width: @media-breakpoint-small-max) and (max-width: @media-breakpoint-medium-max) {
     @rules();
   }
 }
 
 .responsive-large(@rules) {
-  @media (min-width: 1001px) {
+  @media (min-width: @media-breakpoint-medium-max) {
     @rules();
   }
 }

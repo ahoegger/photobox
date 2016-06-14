@@ -35,6 +35,10 @@
 
         $scope.imageSrc = $filter('imageSizeFilter')($scope.imageId, $element[0].getBoundingClientRect());
 
+        $scope.supiClick = function(){
+          console.log('supi click');
+          $scope.imageSelection($scope.imageId);
+        }
         // listeners
         $scope.$watch('rotation', function(newVal) {
           if (angular.isDefined($scope.rotation)) {
