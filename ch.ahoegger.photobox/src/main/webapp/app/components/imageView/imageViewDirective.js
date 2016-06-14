@@ -37,7 +37,7 @@
 
         $scope.supiClick = function(){
           console.log('supi click');
-          $scope.imageSelection($scope.imageId);
+//          $scope.imageSelection($scope.imageId);
         }
         // listeners
         $scope.$watch('rotation', function(newVal) {
