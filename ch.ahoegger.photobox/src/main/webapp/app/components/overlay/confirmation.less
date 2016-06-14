@@ -1,0 +1,29 @@
+.confirmation-overlay{
+  >.overlay-container{
+    border: solid 1px black;
+    .responsive-small({
+      width: 100%;
+      border-left: none;
+      border-right: none;
+    });
+    
+    .confirmation-text{
+      .margin-vertical-media(10px, 20px, 20px);
+      text-align: center;
+    }
+    .button-bar {
+      display: flex;
+      justify-content: center;
+      .tool-button{
+        min-width: 120px;
+        
+        .responsive-small({
+          width: 40%;
+          min-width: initial;
+        });
+      }
+      
+    }
+  }
+  
+}

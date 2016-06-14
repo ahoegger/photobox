@@ -26,6 +26,7 @@
 	<!-- 		<div ng-include='"app/photoview.html"'></div> -->
 	<div ng-controller="photobox.controller as mainController">
 		<div ui-view="main"></div>
+		<div id="overlay-container"></div>
 	</div>
 
 
@@ -67,8 +68,9 @@
 	<script
 		src="bower/bower_components/angular-sanitize/angular-sanitize.js"></script>
 	<script src="bower/bower_components/angular-touch/angular-touch.js"></script>
-	<script src="bower/bower_components/ngSmoothScroll/lib/angular-smooth-scroll.js"></script>
-	
+	<script
+		src="bower/bower_components/ngSmoothScroll/lib/angular-smooth-scroll.js"></script>
+
 	<!-- endbower -->
 	<!-- endbuild -->
 
@@ -91,6 +93,8 @@
 	<script src="app/components/folderPreview/folderPreviewDirective.js"></script>
 	<script src="app/components/imageView/imageViewDirective.js"></script>
 	<script src="app/components/imageView/swipe/imageSwipeDirective.js"></script>
+	<script src="app/components/overlay/overlayDirective.js"></script>
+	<script src="app/components/overlay/overlayService.js"></script>
 
 	<!-- folder view -->
 	<script src="app/folderView/folder.view.module.js"></script>

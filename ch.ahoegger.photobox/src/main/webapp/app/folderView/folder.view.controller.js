@@ -6,7 +6,7 @@
 
   angular.module('module.picturebox.folderview').controller(_controllerName, Controller);
 
-  function Controller($document, $state, $stateParams, smoothScroll, $timeout, resourceService) {
+  function Controller($scope, $document, $state, $stateParams, smoothScroll, $timeout, resourceService, overlayService) {
     var self = this;
     console.log('start controller ', _controllerName, $stateParams);
 
@@ -31,24 +31,23 @@
 
     function _highlight(itemId) {
       var $highlightedElement = $document.find('#photobox-id-' + itemId);
-      if($highlightedElement){
+      if ($highlightedElement && $highlightedElement.length > 0) {
         var options = {
-            duration: 700,
-            easing: 'easeInQuad',
-            offset: 100,
-            callbackBefore: function(element) {
-                console.log('about to scroll to element', element);
-            },
-            callbackAfter: function(element) {
-                console.log('scrolled to element', element);
-            }
+        duration : 700,
+        easing : 'easeInQuad',
+        offset : 100,
+        callbackBefore : function(element) {
+          console.log('about to scroll to element', element);
+        },
+        callbackAfter : function(element) {
+          console.log('scrolled to element', element);
+        }
         }
 
         smoothScroll($highlightedElement[0], options);
 
         $highlightedElement.addClass('highlight');
       }
-
 
     }
 
@@ -65,19 +64,45 @@
     self.onFolderSelection = function(folder) {
       console.log('Folder selected: ' + folder.name);
       $state.go('folderState', {
-        id : folder.id,
-        itemId : undefined
+      id : folder.id,
+      itemId : undefined
       });
     };
+
     self.navigateParent = function() {
       $state.go('folderState', {
-        id : self.folder.parent.id,
-        itemId : self.folder.id
-        
+      id : self.folder.parent.id,
+      itemId : self.folder.id
+
       });
-    }
+    };
+
+    self.handleHide = function() {
+      var updateFolder = {
+      id : self.folder.id,
+      active : false
+      };
+
+      var img = self.folder.pictures[self.index];
+      var overlayId;
+
+      var yesCallback = function() {
+        overlayService.close(overlayId);
+        resourceService.postFolder(updateFolder).then(function() {
+          // success
+          self.navigateParent();
+        });
+      };
+
+      var noCallback = function() {
+        overlayService.close(overlayId);
+      };
+
+      overlayId = overlayService.showConfirmation('Are U sure to hide this album?', yesCallback, noCallback, $scope, [ 'hide-album-confirmation-overlay' ]);
+
+    };
   }
 
-  Controller.$inject = [ '$document', '$state', '$stateParams', 'smoothScroll', '$timeout', 'resource.service' ]
+  Controller.$inject = [ '$scope', '$document', '$state', '$stateParams', 'smoothScroll', '$timeout', 'resource.service', 'overlay.service' ]
 
 })(angular);

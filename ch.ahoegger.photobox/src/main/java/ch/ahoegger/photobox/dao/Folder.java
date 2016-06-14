@@ -3,6 +3,9 @@ package ch.ahoegger.photobox.dao;
 import java.io.Serializable;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Folder implements Serializable {
   private static final long serialVersionUID = 1L;
   public static Folder ROOT = new Folder().withId(0L).withPathOrignal("/");
@@ -10,7 +13,7 @@ public class Folder implements Serializable {
   private Long m_id;
   private String m_name;
   private Long m_parentId;
-  private boolean m_active;
+  private Boolean m_active;
 
   // bean only
   private Folder m_parent;
@@ -39,22 +42,34 @@ public class Folder implements Serializable {
     return this;
   }
 
+  public void setName(String name) {
+    m_name = name;
+  }
+
   public Long getParentId() {
     return m_parentId;
   }
 
   public Folder withParentId(Long parentId) {
-    m_parentId = parentId;
+    setParentId(parentId);
     return this;
   }
 
-  public boolean isActive() {
+  public void setParentId(Long parentId) {
+    m_parentId = parentId;
+  }
+
+  public Boolean getActive() {
     return m_active;
   }
 
-  public Folder withActive(boolean active) {
-    m_active = active;
+  public Folder withActive(Boolean active) {
+    setActive(active);
     return this;
+  }
+
+  public void setActive(Boolean active) {
+    m_active = active;
   }
 
   public String getPathOrignal() {
@@ -62,8 +77,12 @@ public class Folder implements Serializable {
   }
 
   public Folder withPathOrignal(String pathOrignal) {
-    m_pathOrignal = pathOrignal;
+    setPathOrignal(pathOrignal);
     return this;
+  }
+
+  public void setPathOrignal(String pathOrignal) {
+    m_pathOrignal = pathOrignal;
   }
 
   public void setParent(Folder parent) {

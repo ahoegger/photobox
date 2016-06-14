@@ -1,0 +1,29 @@
+photobox-overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity @animation-duration-short ease-in-out;
+  
+  >.glasspane {
+    position: absolute;
+    left: 0;
+    top: 0;
+	width: 100%;
+	height: 100%;
+    background-color: @theme-glasspane-shadow-color;
+    opacity: 0.2;
+  }
+  >.overlay-container{
+    position: relative;
+    background-color: white;
+    box-shadow: 0 0 8px rgba(0, 0, 0, .5);
+    .padding-horizontal-media(5px, 10px, 15px);
+    .padding-vertical-media(5px, 10px, 15px);
+  }
+}

@@ -6,23 +6,33 @@
 
   angular.module('module.picturebox').controller(_controllerName, Controller);
 
-  function Controller($state, $stateParams,$location,  logoutService) {
+  function Controller($scope, $state, $stateParams, $location, overlayService, logoutService) {
     var self = this;
-     console.log('start controller ', _controllerName);
- 
+    console.log('start controller ', _controllerName);
+
     (function _init() {
-     
+
     })();
-    
+
     // callback functions
-    self.handleLogout = function(){
-      logoutService.logout().finally(function(){
-        location.reload(); 
-      });
+    self.handleLogout = function() {
+      var overlayId;
+      var yesCallback = function() {
+        console.log('do logout!!!');
+        overlayService.close(overlayId);
+        logoutService.logout().then(function() {
+          location.reload();
+        }, function() {
+          location.reload();
+        });
+      };
+      var noCallback = function() {
+        overlayService.close(overlayId);
+      };
+      overlayId = overlayService.showConfirmation('Are U sure to logout?', yesCallback, noCallback, $scope, [ 'logout-confirmation-overlay' ]);
     };
-    
 
   }
-  
-  Controller.$inject = [ '$state', '$stateParams', '$location', 'logout.service' ]
+
+  Controller.$inject = [ '$scope', '$state', '$stateParams', '$location', 'overlay.service', 'logout.service' ]
 })(angular);

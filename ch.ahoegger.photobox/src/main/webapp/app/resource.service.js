@@ -64,7 +64,27 @@
           deferred.resolve(result.data);
         },
         function(error){
-          deferred.resolve(undefined);
+          deferred.reject();
+        });
+        return deferred.promise;
+      }
+      
+      var postFolder = function(folder){
+        var url = 'rest/folder/';
+          url +=folder.id;
+        console.log('call postFolder for '+url+'.');
+        var deferred = $q.defer();
+        $http.post(url, folder,
+            {
+                headers: {'Accept': GLOBAL_JSON_TYPE},
+                timeout: GLOBAL_TIMEOUT
+            }
+        )
+        .then(function(result){
+          deferred.resolve(result.data);
+        },
+        function(error){
+          deferred.reject();
         });
         return deferred.promise;
       }
@@ -72,7 +92,8 @@
       return {
           getResources: getResourcesInternal,
           getFolder: getFolder,
-          postImage : postImage
+          postImage : postImage,
+          postFolder :postFolder
       };
     }
     ResourceService.$inject = ['$http', '$q'];

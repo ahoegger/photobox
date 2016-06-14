@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +39,7 @@ public class DbFolder implements IDbFolder {
         int parameterIndex = 1;
         statement.setLong(parameterIndex++, folder.getId().longValue());
         statement.setString(parameterIndex++, folder.getName());
-        statement.setBoolean(parameterIndex++, folder.isActive());
+        statement.setBoolean(parameterIndex++, folder.getActive());
         statement.setString(parameterIndex++, folder.getPathOrignal());
         statement.execute();
         return null;
@@ -170,5 +171,39 @@ public class DbFolder implements IDbFolder {
         .withName(res.getString(2))
         .withActive(res.getBoolean(3))
         .withPathOrignal(res.getString(4));
+  }
+
+  public static Folder update(Folder folder) {
+
+    new DbStatement<Void>() {
+      @Override
+      protected String getStatement() {
+        List<String> updateValues = new ArrayList<String>();
+        if (folder.getActive() != null) {
+          updateValues.add(String.format("%s = ?", COL_ACTIVE));
+        }
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder
+            .append("UPDATE ").append(TABLE_NAME)
+            .append(" SET ");
+        sqlBuilder.append(updateValues.stream().collect(Collectors.joining(" ,")));
+        sqlBuilder.append(" WHERE ")
+            .append(COL_ID).append(" = ?");
+        return sqlBuilder.toString();
+      }
+
+      @Override
+      protected Void bindAndExecute(Connection connection, PreparedStatement statement) throws SQLException {
+        int parameterIndex = 1;
+        if (folder.getActive() != null) {
+          statement.setBoolean(parameterIndex++, folder.getActive().booleanValue());
+        }
+
+        statement.setLong(parameterIndex++, folder.getId());
+        statement.execute();
+        return null;
+      }
+    }.execute();
+    return findById(folder.getId());
   }
 }
