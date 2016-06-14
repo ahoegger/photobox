@@ -40,12 +40,14 @@ public class ApiFolderService {
   @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
   @Path("/{folder}")
   public Folder get(@PathParam("folder") String folderIdRaw) {
+    boolean sortAsc = true;
     long id = 0L;
     if (folderIdRaw != null) {
       id = Long.parseLong(folderIdRaw);
     }
     Folder folder = null;
     if (id == 0l) {
+      sortAsc = false;
       folder = new Folder().withId(0L).withActive(true);
     }
     else {
@@ -66,7 +68,7 @@ public class ApiFolderService {
     }
 
     // load subfolders
-    folder.setSubFolders(DbFolder.findByParentId(folder.getId(), Boolean.TRUE));
+    folder.setSubFolders(DbFolder.findByParentId(folder.getId(), Boolean.TRUE, sortAsc));
     folder.setPictures(DbPicture.findByParentId(folder.getId(), Boolean.TRUE));
     // preview pictures
     List<Long> pictureIds = DbPicture.getPictureIds(folder.getId(), true);

@@ -87,7 +87,7 @@ public class DbPicture implements IDbPicture {
         if (active != null) {
           sqlBuilder.append(" AND ").append(SQL.columnsAliased(TABLE_ALIAS, COL_ACTIVE)).append(" = ?");
         }
-        sqlBuilder.append(" ORDER BY ").append(SQL.columnsAliased(TABLE_ALIAS, COL_NAME, COL_CAPTURE_DATE));
+        sqlBuilder.append(" ORDER BY ").append(SQL.columnsAliased(TABLE_ALIAS, COL_NAME, COL_CAPTURE_DATE)).append(" ASC");
         return sqlBuilder.toString();
       }
 
@@ -178,6 +178,7 @@ public class DbPicture implements IDbPicture {
           sqlBuilder.append(" AND ").append(SQL.columnsAliased(TABLE_ALIAS, COL_ID)).append(" IN (")
               .append(ids.stream().map(id -> "?").collect(Collectors.joining(", "))).append(")");
         }
+        sqlBuilder.append(" ORDER BY ").append(SQL.columnsAliased(TABLE_ALIAS, COL_NAME, COL_CAPTURE_DATE)).append(" ASC");
         return sqlBuilder.toString();
       }
 
@@ -231,7 +232,7 @@ public class DbPicture implements IDbPicture {
         if (active != null) {
           sqlBuilder.append(" AND ").append(SQL.columnsAliased(TABLE_ALIAS, COL_ACTIVE)).append(" = ?");
         }
-        sqlBuilder.append(" ORDER BY ").append(SQL.columnsAliased(TABLE_ALIAS, COL_NAME, COL_CAPTURE_DATE));
+        sqlBuilder.append(" ORDER BY ").append(SQL.columnsAliased(TABLE_ALIAS, COL_NAME, COL_CAPTURE_DATE)).append(" ASC");
         return sqlBuilder.toString();
       }
 

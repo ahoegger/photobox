@@ -1,4 +1,6 @@
 <div class="folder-title">{{folder.name}} ({{pictureCount}})</div>
-<photobox-image-preview ng-repeat="previmg in previewImages" 
-		image-src="rest/picture/{{previmg.id}}"
+<div class="preview-container">
+	<photobox-image-preview ng-repeat="previmg in previewImages"
+		photobox-fixed-height image-src="rest/picture/{{previmg.id}}"
 		image="previmg"></photobox-image-preview>
+</div>

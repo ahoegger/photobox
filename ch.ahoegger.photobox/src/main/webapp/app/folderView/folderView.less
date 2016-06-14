@@ -5,64 +5,9 @@
   >.folders{
 
     photobox-folder-preview{
-      .margin-vertical-media();
-      overflow: auto;
-      
-      
-      &.highlight {
-        animation: borderMarker 2.82s cubic-bezier(.36,.07,.19,.97) both;
-      }
-      
-      .responsive-small( {
-        min-height: 30px;
-    	});
-    	.responsive-medium( {
-          min-height: 50px;
-    	});
-    	.responsive-large( {
-          min-height: 100px;
-    	});
-        
-        
-      .folder-title{
-        .responsive-small({
-          margin: 2px;
-        });
-         
-        .responsive-medium({
-          margin: 5px;
-        });
-          
-        .responsive-large({
-          margin: 5px;
-        });
-      }
-        
-      photobox-image-preview {
-        float: left;
-        
-             
-        .responsive-small( {
-          max-width: 100px;
-          width: 25%;
-          padding: 2px;
-          &:nth-child(5){
-            display:none;
-          }
-        });
-          
-        .responsive-medium( {
-          max-width: 120px;
-          width: 20%;
-          padding: 5px;
-        });
-          
-        .responsive-large( {
-          max-width: 200px;
-          width: 20%;
-          padding: 5px;
-        });
-      }
+
+
+
     }
   }
   
@@ -75,7 +20,9 @@
       
       &.highlight {
       >div{
+        >img{
         animation: zoomInOut 2.82s cubic-bezier(.36,.07,.19,.97) both;
+        }
       }
 /*       transform: translate3d(0, 0, 0); */
 /*       backface-visibility: hidden; */

@@ -4,7 +4,7 @@
 
   var _name = 'photoboxImagePreview';
 
-  angular.module('modulePictureboxComponents').directive(_name, PreviewDirective);
+  angular.module('modulePictureboxComponents').directive(_name, PreviewDirective).directive('photoboxFixedHeight', FixedHeight).directive('photoboxFixedWidth', FixedWidth);
 
   function PreviewDirective($timeout, window, $filter) {
     return {
@@ -23,35 +23,38 @@
       var onWindowResize = _debouncedCenterImage.bind(this);
       var debounce = 500;
       var debouncePromise;
-      
 
       (function _init() {
         $imageContainer = angular.element($element[0].getElementsByClassName('img-preview-container'));
         $image = angular.element($element[0].getElementsByClassName('img-preview'));
         $window = angular.element(window);
         $scope.imageUrl = $filter('imageSizeFilter')($scope.image.id, $element[0].getBoundingClientRect());
-        
-        // initial height = width
-        var containerSize = $imageContainer[0].getBoundingClientRect().width;
-        $imageContainer.css('height', containerSize);
-        $scope.$watch(function(){
-          return $imageContainer[0].getBoundingClientRect().width;
-        }, function(newValue, oldValue){
-          console.log('changed: ',oldValue, newValue);
-          if(newValue && newValue !== oldValue){
-            $imageContainer.css('height', newValue);            
-          }
-        }, true);
 
-        
+//        var watchDimension = 'width';
+//        var oppositeDimension = 'height';
+//        if ($scope.fixedHeight) {
+//          console.log('watch height');
+//        }
+//        // initial height = width
+//        var containerSize = $imageContainer[0].getBoundingClientRect()[watchDimension];
+//        $imageContainer.css(oppositeDimension, containerSize);
+//
+//        $scope.$watch(function() {
+//          return $imageContainer[0].getBoundingClientRect()[watchDimension];
+//        }, function(newValue, oldValue) {
+//          if (newValue && newValue !== oldValue) {
+//            $imageContainer.css(oppositeDimension, newValue);
+//          }
+//        }, true);
+
         if ($scope.imageSelection) {
           $scope.clickCallback = function(event) {
             $scope.imageSelection($scope.image, event);
           }
         }
 
-        if($scope.image.rotation){
-          $image.css('transform', 'rotate('+$scope.image.rotation+'deg)');
+        if ($scope.image.rotation) {
+          $image.css('transform', 'rotate(' + $scope.image.rotation + 'deg)');
         }
 
         // listeners
@@ -59,11 +62,19 @@
           _centerImage();
 
         });
-        $window.bind('resize', onWindowResize);
-
-        $scope.$on('$destroy', function() {
-          $window.unbind('resize', onWindowResize);
-        });
+        
+        $scope.$watch(function(){
+          return $element[0].getBoundingClientRect().width;
+        }, function(newValue, oldValue){
+          if(newValue && newValue != oldValue){
+            _debouncedCenterImage();
+          }
+        })
+//        $window.bind('resize', onWindowResize);
+//
+//        $scope.$on('$destroy', function() {
+//          $window.unbind('resize', onWindowResize);
+//        });
 
       })();
 
@@ -90,7 +101,7 @@
           imgWidth = imageBounds.height;
           imgHeight = imageBounds.width;
         }
-        
+
         var css = {
 
         };
@@ -108,6 +119,87 @@
     }
     };
   }
-  PreviewDirective.$inject = [ '$timeout', '$window','$filter' ];
+  PreviewDirective.$inject = [ '$timeout', '$window', '$filter' ];
 
+  function FixedHeight($timeout, window, $filter) {
+    return {
+    restrict : 'A',
+    link : function($scope, $element, $attrs) {
+      var debounce = 500;
+      var debouncePromise;
+
+      (function _init() {
+
+        _setWidth($element[0].getBoundingClientRect().height);
+        $scope.$watch(function() {
+          return $element[0].getBoundingClientRect().height;
+        }, function(newValue, oldValue) {
+          if (newValue && newValue !== oldValue) {
+            _debouncedUpdateWidth(newValue);
+          }
+        });
+
+      })();
+
+      function _debouncedUpdateWidth(width) {
+        console.log('DEBUONCED set width of preview');
+        if (debouncePromise) {
+          $timeout.cancel(debouncePromise);
+
+        }
+        debouncePromise = $timeout(function() {
+          _setWidth(width);
+          debouncePromise = undefined;
+        }, debounce);
+      }
+
+      function _setWidth(width) {
+        $element.css('width', width);
+      }
+    }
+    };
+  }
+  FixedHeight.$inject = [ '$timeout', '$window', '$filter' ];
+  
+  function FixedWidth($timeout, window, $filter) {
+    return {
+    restrict : 'A',
+    link : function($scope, $element, $attrs) {
+      var debounce = 500;
+      var debouncePromise;
+
+      (function _init() {
+
+        _setHeight($element[0].getBoundingClientRect().width);
+        $scope.$watch(function() {
+          return $element[0].getBoundingClientRect().width;
+        }, function(newValue, oldValue) {
+          if (newValue && newValue !== oldValue) {
+            _debouncedUpdateHeight(newValue);
+          }
+        });
+
+      })();
+
+      function _debouncedUpdateHeight(height) {
+        console.log('DEBUONCED setHeight of preview');
+        if (debouncePromise) {
+          $timeout.cancel(debouncePromise);
+
+        }
+        debouncePromise = $timeout(function() {
+          _setHeight(height);
+          debouncePromise = undefined;
+        }, debounce);
+      }
+
+      function _setHeight(height) {
+        $element.css('height', height);
+      }
+    }
+    };
+  }
+  FixedWidth.$inject = [ '$timeout', '$window', '$filter' ];
+  
+  
 })(angular);

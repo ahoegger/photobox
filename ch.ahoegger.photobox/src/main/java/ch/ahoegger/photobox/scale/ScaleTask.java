@@ -94,7 +94,7 @@ public class ScaleTask {
           is.close();
         }
         catch (Exception e) {
-          //void
+          LOG.error(String.format("Could not close input stream for file '%s'.", path), e);
         }
       }
     }
@@ -117,7 +117,7 @@ public class ScaleTask {
           os.close();
         }
         catch (Exception e) {
-          //void
+          LOG.error(String.format("Could not close output stream for file '%s'.", path), e);
         }
       }
     }

@@ -87,7 +87,7 @@ public class DbFolder implements IDbFolder {
     }.execute();
   }
 
-  public static List<Folder> findByParentId(Long parentId, Boolean active) {
+  public static List<Folder> findByParentId(Long parentId, Boolean active, boolean sortAsc) {
     LOG.debug("find folder by parentId '{}'.", parentId);
 
     return new DbStatement<List<Folder>>() {
@@ -105,9 +105,15 @@ public class DbFolder implements IDbFolder {
         // conditions
         sqlBuilder.append(" WHERE ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_PARENT_ID)).append(" = ? ");
         if (active != null) {
-          sqlBuilder.append(" AND ").append(COL_ACTIVE).append(" = ?");
+          sqlBuilder.append(" AND ").append(SQL.columnsAliased(TABLE_ALIAS, COL_ACTIVE)).append(" = ?");
         }
-        sqlBuilder.append(" ORDER BY ").append(COL_NAME);
+        sqlBuilder.append(" ORDER BY ").append(SQL.columnsAliased(TABLE_ALIAS, COL_NAME));
+        if (sortAsc) {
+          sqlBuilder.append(" ASC");
+        }
+        else {
+          sqlBuilder.append(" DESC");
+        }
         return sqlBuilder.toString();
       }
 
