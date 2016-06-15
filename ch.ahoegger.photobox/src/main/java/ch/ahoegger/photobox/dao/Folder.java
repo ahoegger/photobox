@@ -109,12 +109,17 @@ public class Folder implements Serializable {
     return m_pictures;
   }
 
-  public void setTotalPictureCount(int totalPictureCount) {
-    m_totalPictureCount = totalPictureCount;
-  }
-
   public int getTotalPictureCount() {
     return m_totalPictureCount;
+  }
+
+  public Folder withTotalPictureCount(int totalPictureCount) {
+    setTotalPictureCount(totalPictureCount);
+    return this;
+  }
+
+  public void setTotalPictureCount(int totalPictureCount) {
+    m_totalPictureCount = totalPictureCount;
   }
 
   public void setPreviewPictures(List<Picture> previewPictures) {

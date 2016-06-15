@@ -18,6 +18,8 @@ import ch.ahoegger.photobox.db.util.SQL;
 
 public class DbFolder implements IDbFolder {
   protected static Logger LOG = LoggerFactory.getLogger(DbFolder.class);
+  private static String CHILD_COUNT_TABLE_ALIAS = "CHILD_COUNT_TABLE";
+  private static String COL_CHILD_COUNT = "CHILD_COUNT";
 
   public static Folder create(Folder folder) {
     if (folder.getId() == null) {
@@ -67,12 +69,26 @@ public class DbFolder implements IDbFolder {
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("SELECT ").append(SQL.columnsAliased(TABLE_ALIAS, COL_ID, COL_NAME, COL_ACTIVE, COL_PATH_ORIGINAL))
             .append(", ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_PARENT_ID))
+            .append(", ").append(SQL.columnsAliased(CHILD_COUNT_TABLE_ALIAS, COL_CHILD_COUNT))
             .append(" FROM ").append(TABLE_NAME).append(" AS ").append(TABLE_ALIAS);
         // join navigation links for parent
         sqlBuilder.append(" LEFT OUTER JOIN ").append(IDbNavigationLink.TABLE_NAME).append(" AS ").append(IDbNavigationLink.TABLE_ALIAS)
             .append(" ON ").append(SQL.columnsAliased(TABLE_ALIAS, COL_ID)).append(" = ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_CHILD_ID))
-            .append(" AND ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_DISTANCE)).append(" = 1")
-            .append(" WHERE ").append(COL_ID).append(" = ? ");
+            .append(" AND ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_DISTANCE)).append(" = 1");
+        // join with navigation for count
+        sqlBuilder.append(" LEFT OUTER JOIN (")
+            .append("SELECT ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS + "_1", IDbNavigationLink.COL_PARENT_ID)).append(" AS PPID")
+            .append(", COUNT(").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS + "_1", IDbNavigationLink.COL_CHILD_ID)).append(")").append(" AS ").append(COL_CHILD_COUNT)
+            .append(" FROM ").append(IDbNavigationLink.TABLE_NAME).append(" AS ").append(IDbNavigationLink.TABLE_ALIAS + "_1")
+            .append(" LEFT OUTER JOIN ").append(IDbPicture.TABLE_NAME).append(" AS ").append(IDbPicture.TABLE_ALIAS)
+            .append(" ON ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS + "_1", IDbNavigationLink.COL_CHILD_ID)).append(" = ").append(SQL.columnsAliased(IDbPicture.TABLE_ALIAS, IDbPicture.COL_ID))
+            .append(" WHERE 1 = 1");
+        sqlBuilder.append(" AND ").append(SQL.columnsAliased(IDbPicture.TABLE_ALIAS, IDbPicture.COL_ACTIVE)).append(" = TRUE ");
+        sqlBuilder.append(" GROUP BY ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS + "_1", IDbNavigationLink.COL_PARENT_ID))
+            .append(") AS ").append(CHILD_COUNT_TABLE_ALIAS)
+            .append(" ON ").append(SQL.columnsAliased(TABLE_ALIAS, COL_ID)).append(" = ").append(SQL.columnsAliased(CHILD_COUNT_TABLE_ALIAS, "PPID"));
+        // conditions
+        sqlBuilder.append(" WHERE ").append(COL_ID).append(" = ? ");
         return sqlBuilder.toString();
       }
 
@@ -94,17 +110,35 @@ public class DbFolder implements IDbFolder {
     return new DbStatement<List<Folder>>() {
       @Override
       protected String getStatement() {
+
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("SELECT ").append(SQL.columnsAliased(TABLE_ALIAS, COL_ID, COL_NAME, COL_ACTIVE, COL_PATH_ORIGINAL))
             .append(", ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_PARENT_ID))
+            .append(", ").append(SQL.columnsAliased(CHILD_COUNT_TABLE_ALIAS, COL_CHILD_COUNT))
             .append(" FROM ").append(TABLE_NAME).append(" AS ").append(TABLE_ALIAS);
         // join with navigation for parent
         sqlBuilder.append(" LEFT OUTER JOIN ").append(IDbNavigationLink.TABLE_NAME).append(" AS ").append(IDbNavigationLink.TABLE_ALIAS)
             .append(" ON ").append(SQL.columnsAliased(TABLE_ALIAS, COL_ID)).append(" = ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_CHILD_ID))
             .append(" AND ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_DISTANCE)).append(" = 1");
+        // join with navigation for count
+        sqlBuilder.append(" LEFT OUTER JOIN (")
+            .append("SELECT ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS + "_1", IDbNavigationLink.COL_PARENT_ID)).append(" AS PPID")
+            .append(", COUNT(").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS + "_1", IDbNavigationLink.COL_CHILD_ID)).append(")").append(" AS ").append(COL_CHILD_COUNT)
+            .append(" FROM ").append(IDbNavigationLink.TABLE_NAME).append(" AS ").append(IDbNavigationLink.TABLE_ALIAS + "_1")
+            .append(" LEFT OUTER JOIN ").append(IDbPicture.TABLE_NAME).append(" AS ").append(IDbPicture.TABLE_ALIAS)
+            .append(" ON ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS + "_1", IDbNavigationLink.COL_CHILD_ID)).append(" = ").append(SQL.columnsAliased(IDbPicture.TABLE_ALIAS, IDbPicture.COL_ID))
+            .append(" WHERE 1 = 1 ");
+        if (active != null) {
+          sqlBuilder.append(" AND ").append(SQL.columnsAliased(IDbPicture.TABLE_ALIAS, IDbPicture.COL_ACTIVE)).append(" = ? ");
+        }
+        sqlBuilder.append(" GROUP BY ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS + "_1", IDbNavigationLink.COL_PARENT_ID))
+            .append(") AS ").append(CHILD_COUNT_TABLE_ALIAS)
+            .append(" ON ").append(SQL.columnsAliased(TABLE_ALIAS, COL_ID)).append(" = ").append(SQL.columnsAliased(CHILD_COUNT_TABLE_ALIAS, "PPID"));
 
         // conditions
-        sqlBuilder.append(" WHERE ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_PARENT_ID)).append(" = ? ");
+        sqlBuilder.append(" WHERE ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_PARENT_ID)).append(" = ? ")
+            .append(" AND ").append(SQL.columnsAliased(CHILD_COUNT_TABLE_ALIAS, COL_CHILD_COUNT)).append(" > 0");
+
         if (active != null) {
           sqlBuilder.append(" AND ").append(SQL.columnsAliased(TABLE_ALIAS, COL_ACTIVE)).append(" = ?");
         }
@@ -121,6 +155,9 @@ public class DbFolder implements IDbFolder {
       @Override
       protected List<Folder> bindAndExecute(Connection connection, PreparedStatement statement) throws SQLException {
         int parameterIndex = 1;
+        if (active != null) {
+          statement.setBoolean(parameterIndex++, active);
+        }
         statement.setLong(parameterIndex++, parentId);
         if (active != null) {
           statement.setBoolean(parameterIndex++, active);
@@ -143,12 +180,26 @@ public class DbFolder implements IDbFolder {
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("SELECT ").append(SQL.columnsAliased(TABLE_ALIAS, COL_ID, COL_NAME, COL_ACTIVE, COL_PATH_ORIGINAL))
             .append(", ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_PARENT_ID))
+            .append(", ").append(SQL.columnsAliased(CHILD_COUNT_TABLE_ALIAS, COL_CHILD_COUNT))
             .append(" FROM ").append(TABLE_NAME).append(" AS ").append(TABLE_ALIAS);
         // join with navigation for parent
         sqlBuilder.append(" LEFT OUTER JOIN ").append(IDbNavigationLink.TABLE_NAME).append(" AS ").append(IDbNavigationLink.TABLE_ALIAS)
             .append(" ON ").append(SQL.columnsAliased(TABLE_ALIAS, COL_ID)).append(" = ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_CHILD_ID))
             .append(" AND ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_DISTANCE)).append(" = 1");
+        // join with navigation for count
+        sqlBuilder.append(" LEFT OUTER JOIN (")
+            .append("SELECT ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS + "_1", IDbNavigationLink.COL_PARENT_ID)).append(" AS PPID")
+            .append(", COUNT(").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS + "_1", IDbNavigationLink.COL_CHILD_ID)).append(")").append(" AS ").append(COL_CHILD_COUNT)
+            .append(" FROM ").append(IDbNavigationLink.TABLE_NAME).append(" AS ").append(IDbNavigationLink.TABLE_ALIAS + "_1")
+            .append(" LEFT OUTER JOIN ").append(IDbPicture.TABLE_NAME).append(" AS ").append(IDbPicture.TABLE_ALIAS)
+            .append(" ON ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS + "_1", IDbNavigationLink.COL_CHILD_ID)).append(" = ").append(SQL.columnsAliased(IDbPicture.TABLE_ALIAS, IDbPicture.COL_ID))
+            .append(" WHERE 1 = 1 ");
+        sqlBuilder.append(" AND ").append(SQL.columnsAliased(IDbPicture.TABLE_ALIAS, IDbPicture.COL_ACTIVE)).append(" = ? ");
+        sqlBuilder.append(" GROUP BY ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS + "_1", IDbNavigationLink.COL_PARENT_ID))
+            .append(") AS ").append(CHILD_COUNT_TABLE_ALIAS)
+            .append(" ON ").append(SQL.columnsAliased(TABLE_ALIAS, COL_ID)).append(" = ").append(SQL.columnsAliased(CHILD_COUNT_TABLE_ALIAS, "PPID"));
 
+        // conditions
         sqlBuilder.append(" WHERE ").append(SQL.columnsAliased(TABLE_ALIAS, COL_PATH_ORIGINAL)).append(" LIKE ? ");
         return sqlBuilder.toString();
       }
@@ -170,7 +221,9 @@ public class DbFolder implements IDbFolder {
         .withParentId(res.getLong(5))
         .withName(res.getString(2))
         .withActive(res.getBoolean(3))
-        .withPathOrignal(res.getString(4));
+        .withPathOrignal(res.getString(4))
+        .withTotalPictureCount(res.getInt(6));
+
   }
 
   public static Folder update(Folder folder) {
