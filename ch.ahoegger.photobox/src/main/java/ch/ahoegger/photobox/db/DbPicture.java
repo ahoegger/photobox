@@ -292,4 +292,61 @@ public class DbPicture implements IDbPicture {
     }.execute();
     return findById(picture.getId());
   }
+
+  /**
+   * @param id
+   */
+  public static void delete(Long id) {
+    new DbStatement<Void>() {
+      @Override
+      protected String getStatement() {
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder
+            .append("DELETE FROM ").append(TABLE_NAME).append(" AS ").append(TABLE_ALIAS)
+            .append(" WHERE ").append(SQL.columnsAliased(TABLE_ALIAS, COL_ID)).append(" = ? ");
+        return sqlBuilder.toString();
+      }
+
+      @Override
+      protected Void bindAndExecute(Connection connection, PreparedStatement statement) throws SQLException {
+        int parameterIndex = 1;
+        statement.setLong(parameterIndex++, id);
+        int result = statement.executeUpdate();
+        LOG.debug("Delete picture with id '{}' affected '{}' rows.", id, result);
+        return null;
+      }
+    }.execute();
+
+    DbNavigationLink.deleteByChildId(id);
+
+  }
+
+  /**
+   * @param parentId
+   */
+  public static void deleteByParentId(Long parentId) {
+
+    new DbStatement<Void>() {
+      @Override
+      protected String getStatement() {
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder
+            .append("DELETE FROM ").append(TABLE_NAME).append(" AS ").append(TABLE_ALIAS)
+            .append(" WHERE ").append(SQL.columnsAliased(TABLE_ALIAS, COL_ID)).append(" IN (")
+            .append("SELECT ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_CHILD_ID))
+            .append(" FROM ").append(IDbNavigationLink.TABLE_NAME).append(" AS ").append(IDbNavigationLink.TABLE_ALIAS)
+            .append(" WHERE ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_PARENT_ID)).append(" = ? )");
+        return sqlBuilder.toString();
+      }
+
+      @Override
+      protected Void bindAndExecute(Connection connection, PreparedStatement statement) throws SQLException {
+        int parameterIndex = 1;
+        statement.setLong(parameterIndex++, parentId);
+        int result = statement.executeUpdate();
+        LOG.debug("Delete pictures width parent id '{}' affected '{}' rows.", parentId, result);
+        return null;
+      }
+    }.execute();
+  }
 }

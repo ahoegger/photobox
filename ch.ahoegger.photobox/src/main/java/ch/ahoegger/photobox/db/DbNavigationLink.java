@@ -73,4 +73,52 @@ public class DbNavigationLink implements IDbNavigationLink {
       }
     }.execute();
   }
+
+  /**
+   * @param id
+   */
+  public static void deleteByParentId(Long id) {
+    new DbStatement<Void>() {
+      @Override
+      protected String getStatement() {
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder
+            .append("DELETE FROM ").append(TABLE_NAME).append(" AS ").append(TABLE_ALIAS)
+            .append(" WHERE ").append(SQL.columnsAliased(TABLE_ALIAS, COL_PARENT_ID)).append(" = ? ");
+        return sqlBuilder.toString();
+      }
+
+      @Override
+      protected Void bindAndExecute(Connection connection, PreparedStatement statement) throws SQLException {
+        int parameterIndex = 1;
+        statement.setLong(parameterIndex++, id);
+        statement.execute();
+        return null;
+      }
+    }.execute();
+  }
+
+  /**
+   * @param id
+   */
+  public static void deleteByChildId(Long id) {
+    new DbStatement<Void>() {
+      @Override
+      protected String getStatement() {
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder
+            .append("DELETE FROM ").append(TABLE_NAME).append(" AS ").append(TABLE_ALIAS)
+            .append(" WHERE ").append(SQL.columnsAliased(TABLE_ALIAS, COL_CHILD_ID)).append(" = ? ");
+        return sqlBuilder.toString();
+      }
+
+      @Override
+      protected Void bindAndExecute(Connection connection, PreparedStatement statement) throws SQLException {
+        int parameterIndex = 1;
+        statement.setLong(parameterIndex++, id);
+        statement.execute();
+        return null;
+      }
+    }.execute();
+  }
 }

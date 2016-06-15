@@ -6,6 +6,8 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Stack;
 
 import org.quartz.DisallowConcurrentExecution;
@@ -74,6 +76,10 @@ public class ScaleJob extends AbstractCanceableJob {
     if (!Files.isDirectory(directory)) {
       throw new IllegalArgumentException(String.format("'%s' is not a directory.", directory));
     }
+    Map<String, Folder> existingFolders = new HashMap<String, Folder>();
+    DbFolder.findByParentId(id, null, false).forEach(folder -> existingFolders.put(folder.getPathOrignal(), folder));
+    Map<String, Picture> existingPictures = new HashMap<String, Picture>();
+    DbPicture.findByParentId(id, null).forEach(img -> existingPictures.put(img.getPathOrignal(), img));
     DirectoryStream<Path> directoryStream = null;
     try {
       directoryStream = Files.newDirectoryStream(directory);
@@ -81,11 +87,14 @@ public class ScaleJob extends AbstractCanceableJob {
         if (monitor.isCanceled()) {
           break;
         }
+        String pathKey = PhotoUtility.pathToString(m_orignalDirectory.relativize(p), "/");
         if (Files.isDirectory(p)) {
+          existingFolders.remove(pathKey);
           m_directories.push(new DirectoryDesc(p, id));
         }
         else {
           if (m_imageMatcher.matches(p)) {
+            existingPictures.remove(pathKey);
             try {
               scaleImage(p, id);
             }
@@ -100,6 +109,23 @@ public class ScaleJob extends AbstractCanceableJob {
       if (directoryStream != null) {
         directoryStream.close();
       }
+    }
+    try {
+      // clean up
+      if (existingFolders.size() > 0) {
+        existingFolders.values().forEach(folder -> new DeleteFolderTask(folder).run());
+      }
+      if (existingPictures.size() > 0) {
+        existingPictures.values().forEach(picture -> new DeletePictureTask(picture).run());
+      }
+      DbConnection.commit();
+    }
+    catch (Exception e) {
+      DbConnection.rollback();
+      throw e;
+    }
+    finally {
+      DbConnection.release();
     }
 
   }
