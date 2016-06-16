@@ -128,7 +128,7 @@
           var left = -100;
           for (i = -1; i < 2; i++) {
             if (i + currentIndex >= 0 && i + currentIndex < files.length) {
-              source = '<photobox-image-view ' + 'image-selection="clickCallback" ' + 'image-id="' + $scope.files[i + currentIndex].id + '" ' + 'rotation="files[' + (i + currentIndex) + '].rotation"' + '></photobox-image-view>';
+              source = '<photobox-image-view photobox-image-zoom image-selection="clickCallback" ' + 'image-id="' + $scope.files[i + currentIndex].id + '" ' + 'rotation="files[' + (i + currentIndex) + '].rotation"' + '></photobox-image-view>';
               // source = '<photobox-image-view image-selection="clickCallback"
               // image-src="' + linkFilter($scope.files[i + currentIndex].links,
               // 'Desktop') + '"></photobox-image-view>';
@@ -237,7 +237,7 @@
       }
 
       function _createImageView(fileIndex, append) {
-        var source = '<photobox-image-view  image-selection="clickCallback"  image-id="' + $scope.files[fileIndex].id + '" rotation="files[' + fileIndex + '].rotation"></photobox-image-view>';
+        var source = '<photobox-image-view  photobox-image-zoom image-selection="clickCallback"  image-id="' + $scope.files[fileIndex].id + '" rotation="files[' + fileIndex + '].rotation"></photobox-image-view>';
         // var source = '<photobox-image-view image-selection="clickCallback"
         // image-src="' + linkFilter($scope.files[fileIndex].links, 'Desktop') +
         // '"></photobox-image-view>';
@@ -265,6 +265,8 @@
       var onMouseMove = _mouseMove.bind(self);
       var onTouchMove = _touchMove.bind(self);
       var onMoveEnd = _moveEnd.bind(self);
+      var startTimeStamp;
+      var endTimeStamp;
 
       function _addDragListeners($image) {
         $image.on('mousedown', onMouseDown);
@@ -277,15 +279,17 @@
       }
 
       function _touchStart(event) {
+        startTimeStamp = event.timeStamp;
         event.preventDefault();
-//        event.stopPropagation();
+        // event.stopPropagation();
         console.log('touch start!!!');
         var touch = event.originalEvent.touches[0];
         _dragStart(touch.pageX);
       }
       function _mouseDown(event) {
+        startTimeStamp = event.timeStamp;
         event.preventDefault();
-//        event.stopPropagation();
+        // event.stopPropagation();
         console.log('mouse down!!!');
         _dragStart(event.pageX);
       }
@@ -305,12 +309,12 @@
 
       function _mouseMove(event) {
         event.preventDefault();
-//        event.stopPropagation();
+        // event.stopPropagation();
         _move(event.pageX);
       }
       function _touchMove(event) {
         event.preventDefault();
-//        event.stopPropagation();
+        // event.stopPropagation();
         var touch = event.originalEvent.touches[0];
         _move(touch.pageX);
 
@@ -319,17 +323,18 @@
         swipeCurrentX = xPosition;
         var deltaX = swipeCurrentX - swipeStartX;
         if (deltaX < 0) {
-          if(!$images[2]){
-            deltaX = deltaX/5;
+          if (!$images[2]) {
+            deltaX = deltaX / 5;
           }
-        } else if (deltaX > 0 ) {
-          if(!$images[0]){
-            deltaX = deltaX/5;
+        } else if (deltaX > 0) {
+          if (!$images[0]) {
+            deltaX = deltaX / 5;
           }
         }
         _updatePositions(deltaX);
       }
       function _moveEnd(event) {
+        var timeDiff = event.timeStamp - startTimeStamp;
         event.preventDefault();
         event.stopPropagation();
         if (!swiping) {
@@ -345,32 +350,50 @@
         if (angular.isUndefined(swipeCurrentX)) {
           swipeCurrentX = swipeStartX;
         }
-
         deltaX = swipeCurrentX - swipeStartX;
+
+        if (timeDiff < 500 && Math.abs(deltaX) < 10) {
+          if (selectionPromise) {
+            $timeout.cancel(selectionPromise);
+            selectionPromise = undefined;
+            _handleImageDoubleSelection();
+          } else {
+            selectionPromise = $timeout(function() {
+              _handleImageSelection();
+              selectionPromise = undefined;
+            }, 300);
+          }
+        }
+
         swipeCurrentX = undefined;
         swipeStartX = undefined;
         $scope.$apply(function() {
           _snap(deltaX);
         });
-
       }
+
+      var selectionPromise;
 
       function _snap(deltaX) {
         var elementWidth = $container[0].getBoundingClientRect().width;
         if (Math.abs(deltaX) > elementWidth * 0.25) {
           if (deltaX > 0 && $images[0]) {
-                        _snapPrevious();
-          } else if(deltaX < 0 && $images[2]) {
+            _snapPrevious();
+          } else if (deltaX < 0 && $images[2]) {
             _snapNext();
-          }else{
+          } else {
             _updatePositions(0);
           }
         } else {
           _updatePositions(0);
-          if (Math.abs(deltaX) < 10) {
-            $scope.imageSelection($scope.files[currentIndex]);
-          }
         }
+      }
+      
+      function _handleImageSelection(){
+        $scope.imageSelection($scope.files[currentIndex]);
+      }
+      
+      function _handleImageDoubleSelection(){
       }
 
       function _handleKeyDown(event) {
