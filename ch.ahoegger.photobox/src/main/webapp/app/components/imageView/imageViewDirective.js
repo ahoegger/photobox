@@ -28,7 +28,8 @@
       var originalImageSize;
       var onWindowResize = function(){
         console.log('['+$scope.imageId+']: resized!!!');
-        imageViewController.setContainerSize($)
+        var containerSize = $element[0].getBoundingClientRect();
+        imageViewController.setContainerSize(containerSize.width, containerSize.height);
         _debouncedLayoutImage();
       }.bind(this);
 

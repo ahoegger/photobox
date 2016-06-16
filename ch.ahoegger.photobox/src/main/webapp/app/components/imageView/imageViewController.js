@@ -4,7 +4,7 @@
 
   angular.module('modulePictureboxComponents').factory('zoomDataFactory', ZoomDataFactory).controller('imageViewController', Controller);
 
-  function Controller($scope, ZoomData) {
+  function Controller($scope, $filter, ZoomData) {
     var self = this;
     var containerSize;
     var $image;
@@ -40,7 +40,7 @@
       if (!initalImageSize || !$image) {
         return;
       }
-      console.log('[' + $scope.imageId + ']: DO layout');
+      console.log('DO LAYOUT '+rotation);
 
       var imgWidth, imgHeight;
       var width, height;
@@ -62,24 +62,45 @@
       if (zoomData) {
         scaleFactor = scaleFactor * zoomData.getFactor();
       }
-      var width = width * scaleFactor;
-      var height = height * scaleFactor;
+      width = width * scaleFactor;
+      height = height * scaleFactor;
       var top = Math.floor((containerSize.height - height) / 2);
       var left = Math.floor((containerSize.width - width) / 2);
       if (zoomData) {
-        // ensure image bounds
-        var deltaX = 0;
-        var deltaY = 0;
-        if (left < 0) {
-          deltaX = Math.min(Math.abs(left), (zoomData.getOffsetX() + zoomData.getDeltaX()));
-          deltaX = Math.max(left, (containerSize.width - width), deltaX);
+        if (zoomData.getOriginX() && zoomData.getOriginY()) {
+          if (left < 0) {
+            var calcLeft = containerSize.width / 2 - zoomData.getOriginX() * width;
+            calcLeft = Math.min(calcLeft, 0);
+            calcLeft = Math.max(calcLeft, containerSize.width - width);
+            // update offsetX
+            zoomData.setOffsetX(calcLeft - left);
+            zoomData.setDeltaX(0);
+            left = calcLeft;
+          }
+          if (top < 0) {
+            var calcTop = containerSize.height / 2 - zoomData.getOriginY() * height;
+            calcTop = Math.min(calcTop, 0);
+            calcTop = Math.max(calcTop, containerSize.height - height);
+            zoomData.setOffsetY(calcTop - top);
+            zoomData.setDeltaY(0);
+            top = calcTop;
+
+          }
+        } else {
+          // ensure image bounds
+          var deltaX = 0;
+          var deltaY = 0;
+          if (left < 0) {
+            deltaX = Math.min(Math.abs(left), (zoomData.getOffsetX() + zoomData.getDeltaX()));
+            deltaX = Math.max(left, (containerSize.width - width), deltaX);
+          }
+          if (top < 0) {
+            deltaY = Math.min(Math.abs(top), (zoomData.getOffsetY() + zoomData.getDeltaY()));
+            deltaY = Math.max(top, (containerSize.height - height), deltaY);
+          }
+          left += deltaX;
+          top += deltaY;
         }
-        if (top < 0) {
-          deltaY = Math.min(Math.abs(top), (zoomData.getOffsetY() + zoomData.getDeltaY()));
-          deltaY = Math.max(top, (containerSize.height - height), deltaY);
-        }
-        left += deltaX;
-        top += deltaY;
       }
 
       $image.css({
@@ -112,8 +133,10 @@
       var originX = 1 / imgBounds.width * (positionX - imgBounds.left);
       var originY = 1 / imgBounds.height * (positionY - imgBounds.top);
       if (!zoomData) {
-        zoomData = new ZoomData(originX, originY);
+        zoomData = new ZoomData();
       }
+      zoomData.setOriginX(originX);
+      zoomData.setOriginY(originY);
       zoomData.setInterval(setInterval(function() {
         if (zoomData.getFactor() >= 6) {
           clearInterval(zoomData.getInterval());
@@ -126,9 +149,15 @@
     };
 
     self.stopZoom = function() {
-      if (zoomData && zoomData.getInterval()) {
-        clearInterval(zoomData.getInterval());
-        zoomData.setInterval();
+      if (zoomData) {
+        if (zoomData.getInterval()) {
+          clearInterval(zoomData.getInterval());
+          zoomData.setInterval();
+        }
+        zoomData.setOriginX();
+        zoomData.setOriginY();
+        $scope.imageSrc = $filter('imageSizeFilter')($scope.imageId, $image[0].getBoundingClientRect());
+        console.log('image: ' + $scope.imageSrc);
       }
     };
 
@@ -148,14 +177,14 @@
 
   }
 
-  Controller.$inject = [ '$scope', 'zoomDataFactory' ];
+  Controller.$inject = [ '$scope', '$filter', 'zoomDataFactory' ];
 
   // TODO ngDoc
   function ZoomDataFactory() {
 
-    function ZoomData(originX, originY) {
-      this.originX = originX;
-      this.originY = originY;
+    function ZoomData() {
+      this.originX;
+      this.originY;
       this.factor = 1;
       this.interval;
       this.offsetX = 0;
@@ -163,6 +192,20 @@
       this.deltaX = 0;
       this.deltaY = 0;
     }
+
+    ZoomData.prototype.setOriginX = function(originX) {
+      this.originX = originX;
+    };
+    ZoomData.prototype.getOriginX = function() {
+      return this.originX;
+    };
+    ZoomData.prototype.setOriginY = function(originY) {
+      this.originY = originY;
+    };
+    ZoomData.prototype.getOriginY = function() {
+      return this.originY;
+    };
+
     ZoomData.prototype.setOffsetX = function(offsetX) {
       this.offsetX = offsetX;
     };
