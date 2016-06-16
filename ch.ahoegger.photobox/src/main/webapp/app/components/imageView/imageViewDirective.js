@@ -85,7 +85,7 @@
           console.log('['+$scope.imageId+']: after load!!!');
           _layoutImage();
           $timeout(function(){
-            $image.addClass('animated');
+            $image.addClass('animated visible');
           },100);
 
         });

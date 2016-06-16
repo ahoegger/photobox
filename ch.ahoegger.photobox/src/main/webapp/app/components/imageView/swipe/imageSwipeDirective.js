@@ -85,9 +85,9 @@
       })();
 
       function _initialUpdateImagesDebounced() {
-        $container.removeClass('animated');
+        _setAnimated(false);
         _updateImagesDebounced().then(function() {
-          $container.addClass('animated');
+          _setAnimated(true);
         });
       }
 
@@ -143,6 +143,23 @@
         }
       }
 
+      
+      function _setAnimated(animated){
+        var fun = function($img){
+          if(animated){
+            $img.addClass('animated');
+          }
+          else{
+            $img.removeClass('animated');
+          }
+        };
+        $images.forEach(function ($img){
+          if($img){
+            fun($img);
+          }
+        });
+      }
+      
       function _setCurrentImage($image) {
         if ($currentImage) {
           _removeDragListener($currentImage);
@@ -298,7 +315,7 @@
           return;
         }
         console.log('add listeners...');
-        $container.removeClass('animated');
+        _setAnimated(false);
         swipeStartX = xPosition;
         console.log('dragStart');
         $document.on('mousemove', onMouseMove);
@@ -344,7 +361,7 @@
         $document.off('mousemove', onMouseMove);
         $document.off('touchmove', onTouchMove);
         $document.off('mouseup touchend', onMoveEnd);
-        $container.addClass('animated');
+        _setAnimated(true);
         swiping = false;
         var deltaX;
         if (angular.isUndefined(swipeCurrentX)) {

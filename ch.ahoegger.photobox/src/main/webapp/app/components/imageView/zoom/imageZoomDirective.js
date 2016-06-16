@@ -81,9 +81,10 @@
         }, startZoomTimeout);
         if (imageViewController.getZoomFactor()) {
           isZoomed = true;
+          $image.removeClass('animated');
           event.preventDefault();
           event.stopPropagation();
-        }else{
+        } else {
           isZoomed = false;
         }
       }
@@ -103,7 +104,8 @@
       function _move(xPos, yPos, event) {
         eventDetail.xEnd = xPos;
         eventDetail.yEnd = yPos;
-        if (!_isValidZoomDelta(xPos, yPos)) {
+        // console.log('move: ',xPos,yPos);
+        if (!_isValidZoomDelta(eventDetail)) {
           _stopZoom();
         }
         if (isZoomed) {
@@ -118,7 +120,9 @@
         if (isZoomed) {
           event.preventDefault();
           event.stopPropagation();
+          imageViewController.moveEnd();
         }
+        $image.addClass('animated');
         _stopZoom();
         if (_isClick(eventDetail)) {
           _handleClick();
@@ -126,10 +130,8 @@
       }
 
       function _zoom() {
-        imageViewController.startZoom(startPosition.x, startPosition.y);
-        // zoomIntervalId = setInterval(function() {
-        // console.log('zoooom');
-        // }, 10);
+        $image.removeClass('animated');
+        imageViewController.startZoom(eventDetail.xEnd, eventDetail.yEnd);
       }
 
       function _stopZoom() {
@@ -139,27 +141,21 @@
         }
         imageViewController.stopZoom();
 
-        $image.off('mousemove', onMouseMove);
-        $image.off('touchmove', onTouchMove);
-        $image.off('mouseup touchend', onEnd);
       }
 
       function _handleClick() {
         imageViewController.resetZoom();
       }
 
-      function _isValidZoomDelta(x, y) {
-        console.log('is valid zoom compare ', startPosition, x, y);
-        if (!startPosition) {
+      function _isValidZoomDelta(eventDetail) {
+        if (!eventDetail) {
           return false;
         }
-        if (Math.abs(startPosition.x - x) > 10) {
-          return false;
-        }
-        if (Math.abs(startPosition.y - y) > 10) {
+        if (Math.abs(eventDetail.xEnd - eventDetail.xStart) > 10 || Math.abs(eventDetail.yEnd - eventDetail.yStart) > 10) {
           return false;
         }
         return true;
+
       }
 
       function _isClick(eventDetail) {
