@@ -25,7 +25,6 @@
       var fit = true;
       var debouncePromise;
       var debounce = $scope.debounce || 200;
-      var originalImageSize;
       var onWindowResize = function(){
         console.log('['+$scope.imageId+']: resized!!!');
         var containerSize = $element[0].getBoundingClientRect();
@@ -76,13 +75,7 @@
         }
 
         $image.bind('load', function() {
-          var imageBounds = $image[0].getBoundingClientRect();
-          console.log('after load: h:' + imageBounds.height + ' w:' + imageBounds.width)
-          imageViewController.setInitialSize(imageBounds.width, imageBounds.height);
-          originalImageSize = {
-          width : imageBounds.width,
-          height : imageBounds.height
-          };
+          imageViewController.setInitialSize(this.naturalWidth, this.naturalHeight);
           console.log('['+$scope.imageId+']: after load!!!');
           _layoutImage();
           $timeout(function(){
@@ -114,59 +107,8 @@
           $timeout.cancel(debouncePromise);
           debouncePromise = undefined;
         }
-        console.log('['+$scope.imageId+']: try layout');
         imageViewController.layout();
-//        if (!originalImageSize) {
-//          return;
-//        }
-//        if (fit) {
-//          _fitImage();
-//        } else {
-//          // TODO
-//        }
-
       }
-//      function _fitImage() {
-//        console.log('['+$scope.imageId+']: DO layout');
-//        var containerSize = $element[0].getBoundingClientRect();
-//
-//        var imgWidth, imgHeight;
-//
-//        if (($scope.rotation / 90) % 2 == 0) {
-//          imgWidth = originalImageSize.width;
-//          imgHeight = originalImageSize.height;
-//        } else {
-//          imgWidth = originalImageSize.height;
-//          imgHeight = originalImageSize.width;
-//        }
-//
-//        var scaleFactor = containerSize.width / imgWidth;
-//        scaleFactor = Math.min(scaleFactor, containerSize.height / imgHeight);
-//        console.log('['+$scope.imageId+']: fit image!!!', scaleFactor);
-//        var width = imgWidth * scaleFactor;
-//        var height = imgHeight * scaleFactor;
-//        var top = Math.floor((containerSize.height - height) / 2);
-//        var left = Math.floor((containerSize.width - width) / 2);
-//        var css;
-//        if (($scope.rotation / 90) % 2 == 0) {
-//          css = {
-//          top : top + 'px',
-//          left : left + 'px',
-//          width : width + 'px',
-//          height : height + 'px',
-//          transform :  'rotate(' + $scope.rotation + 'deg)'
-//          };
-//        } else {
-//          css = {
-//          top : Math.floor((containerSize.height - width) / 2) + 'px',
-//          left : Math.floor((containerSize.width - height) / 2) + 'px',
-//          width : height + 'px',
-//          height : width + 'px',
-//          transform :  'rotate(' + $scope.rotation + 'deg)'
-//          };
-//        }
-//        $image.css(css);
-//      }
       
     }
     };

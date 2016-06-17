@@ -131,6 +131,7 @@
 
       function _zoom() {
         $image.removeClass('animated');
+        // calc container relative
         imageViewController.startZoom(eventDetail.xEnd, eventDetail.yEnd);
       }
 
