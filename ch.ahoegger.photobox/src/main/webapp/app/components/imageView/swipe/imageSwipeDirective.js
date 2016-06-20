@@ -128,7 +128,7 @@
           var left = -100;
           for (i = -1; i < 2; i++) {
             if (i + currentIndex >= 0 && i + currentIndex < files.length) {
-              source = '<photobox-image-view class="animated" photobox-image-zoom image-selection="clickCallback" ' + 'image-id="' + $scope.files[i + currentIndex].id + '" ' + 'rotation="files[' + (i + currentIndex) + '].rotation"' + '></photobox-image-view>';
+              source = '<photobox-image-view class="animated" photobox-image-zoom full-screen="fullScreen" image-selection="clickCallback" ' + 'image-id="' + $scope.files[i + currentIndex].id + '" ' + 'rotation="files[' + (i + currentIndex) + '].rotation"' + '></photobox-image-view>';
               // source = '<photobox-image-view image-selection="clickCallback"
               // image-src="' + linkFilter($scope.files[i + currentIndex].links,
               // 'Desktop') + '"></photobox-image-view>';
@@ -254,7 +254,7 @@
       }
 
       function _createImageView(fileIndex, append) {
-        var source = '<photobox-image-view  class="animated" photobox-image-zoom image-selection="clickCallback"  image-id="' + $scope.files[fileIndex].id + '" rotation="files[' + fileIndex + '].rotation"></photobox-image-view>';
+        var source = '<photobox-image-view  class="animated" photobox-image-zoom full-screen="fullScreen" image-selection="clickCallback"  image-id="' + $scope.files[fileIndex].id + '" rotation="files[' + fileIndex + '].rotation"></photobox-image-view>';
         // var source = '<photobox-image-view image-selection="clickCallback"
         // image-src="' + linkFilter($scope.files[fileIndex].links, 'Desktop') +
         // '"></photobox-image-view>';

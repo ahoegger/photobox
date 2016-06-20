@@ -297,6 +297,8 @@
         zoomData.incrementFactor(0.015);
         self.layout();
       }, 15));
+      zoomData.setFullScreenBeforeZoom($scope.fullScreen);
+      $scope.fullScreen = !$scope.fullScreen;
     };
 
     self.stopZoom = function() {
@@ -314,6 +316,7 @@
 
     self.resetZoom = function() {
       if (zoomData) {
+        $scope.fullScreen = zoomData.getFullScreenBeforeZoom();
         zoomData = undefined;
         self.layout();
       }
@@ -342,7 +345,9 @@
       this.offsetY = 0;
       this.deltaX = 0;
       this.deltaY = 0;
+      this.fullScreenBeforeZoom = false;
     }
+
 
     ZoomData.prototype.setOriginX = function(originX) {
       this.originX = originX;
@@ -402,6 +407,15 @@
     ZoomData.prototype.getInterval = function() {
       return this.interval;
     };
+    
+    ZoomData.prototype.getFullScreenBeforeZoom = function() {
+      return this.fullScreenBeforeZoom;
+    };
+    
+    ZoomData.prototype.setFullScreenBeforeZoom = function(fullScreenBeforeZoom) {
+      this.fullScreenBeforeZoom = fullScreenBeforeZoom;
+    };
+    
 
     return ZoomData;
   }

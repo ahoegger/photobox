@@ -4,7 +4,7 @@
 
   angular.module('modulePictureboxComponents').directive('photoboxImageZoom', ZoomDirective);
 
-  function ZoomDirective($document, $timeout, window, $filter) {
+  function ZoomDirective($document, $timeout, window, $filter, MouseEvent) {
     return {
     restrict : 'A',
     require : '^photoboxImageView',
@@ -14,7 +14,6 @@
       var $image;
       var originalImageSize;
       var startTimeStamp;
-      var startPosition;
       var startZoomPromise;
       var zoomIntervalId;
       var isZoomed;
@@ -60,17 +59,7 @@
       }
 
       function _start(xOffset, yOffset, event) {
-        startPosition = {
-
-        };
-        eventDetail = {
-        xStart : xOffset,
-        yStart : yOffset,
-        xEnd : xOffset,
-        yEnd : yOffset,
-        timeStart : event.timeStamp,
-        timeEnd : event.timeStamp
-        };
+        eventDetail = new MouseEvent(xOffset, yOffset, event.timeStamp).withEnd(xOffset, yOffset, event.timeStamp);
         console.log('zoom start with: ', xOffset, yOffset);
         // attach listeners
         $image.on('mousemove', onMouseMove);
@@ -102,21 +91,20 @@
 
       }
       function _move(xPos, yPos, event) {
-        eventDetail.xEnd = xPos;
-        eventDetail.yEnd = yPos;
+        eventDetail.withEndPosition(xPos, yPos);
         // console.log('move: ',xPos,yPos);
-        if (!_isValidZoomDelta(eventDetail)) {
+        if (!MouseEvent.isClickOffset(eventDetail)) {
           _stopZoom();
         }
         if (isZoomed) {
           event.preventDefault();
           event.stopPropagation();
-          imageViewController.move(eventDetail.xEnd - eventDetail.xStart, eventDetail.yEnd - eventDetail.yStart);
+          imageViewController.move(eventDetail.getEndX() - eventDetail.getStartX(), eventDetail.getEndY() - eventDetail.getStartY());
         }
       }
 
       function _moveEnd(event) {
-        eventDetail.timeEnd = event.timeStamp;
+        eventDetail.withEndTime(event.timeStamp);
         if (isZoomed) {
           event.preventDefault();
           event.stopPropagation();
@@ -124,15 +112,18 @@
         }
         $image.addClass('animated');
         _stopZoom();
-        if (_isClick(eventDetail)) {
-          _handleClick();
+        if (MouseEvent.isClick(eventDetail)) {
+          $scope.$apply(function(){
+            _handleClick();            
+          });
+
         }
       }
 
       function _zoom() {
         $image.removeClass('animated');
         // calc container relative
-        imageViewController.startZoom(eventDetail.xEnd, eventDetail.yEnd);
+        imageViewController.startZoom(eventDetail.getEndX(), eventDetail.getEndY());
       }
 
       function _stopZoom() {
@@ -148,32 +139,9 @@
         imageViewController.resetZoom();
       }
 
-      function _isValidZoomDelta(eventDetail) {
-        if (!eventDetail) {
-          return false;
-        }
-        if (Math.abs(eventDetail.xEnd - eventDetail.xStart) > 10 || Math.abs(eventDetail.yEnd - eventDetail.yStart) > 10) {
-          return false;
-        }
-        return true;
-
-      }
-
-      function _isClick(eventDetail) {
-        if (!eventDetail) {
-          return false;
-        }
-        if (Math.abs(eventDetail.timeStart - eventDetail.timeEnd) > 300) {
-          return false;
-        }
-        if (Math.abs(eventDetail.xEnd - eventDetail.xStart) > 10 || Math.abs(eventDetail.yEnd - eventDetail.yStart) > 10) {
-          return false;
-        }
-        return true;
-      }
     }
     };
   }
-  ZoomDirective.$inject = [ '$document', '$timeout', '$window', '$filter' ];
+  ZoomDirective.$inject = [ '$document', '$timeout', '$window', '$filter', 'PhotoboxMouseEvent' ];
 
 })(angular);

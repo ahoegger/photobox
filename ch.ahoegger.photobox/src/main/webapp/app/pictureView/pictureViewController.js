@@ -14,6 +14,11 @@
 
     (function _init() {
       self.fullScreen = false;
+      $scope.$watch(function(){
+        return self.fullScreen;
+      }, function(newVal){
+        console.log('Full screen changed: ', newVal);
+      }, true);
 
       self.index = $stateParams.index;
       var url = "rest/api/";
