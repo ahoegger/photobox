@@ -26,18 +26,21 @@
       (function _init() {
         $previewContainer = angular.element($element[0].getElementsByClassName('preview-container'));
         _updatePreviewContainerHeight();
-        if ($scope.folder.childrenLoaded) {
-          $scope.pictureCount = response.totalPictureCount;
-          $scope.previewImages = response.previewPictures;
-        } else {
-          var apiUrl = 'rest/api/' + $scope.folder.id;
-          if (apiUrl) {
-            resourceService.getResources(apiUrl).then(function(response) {
-              $scope.pictureCount = response.totalPictureCount;
-              $scope.previewImages = response.previewPictures;
-            });
-          }
-        }
+        
+        $scope.pictureCount = $scope.folder.totalPictureCount;
+        $scope.previewImages = $scope.folder.previewPictures;
+//        if ($scope.folder.childrenLoaded) {
+//          $scope.pictureCount = response.totalPictureCount;
+//          $scope.previewImages = response.previewPictures;
+//        } else {
+//          var apiUrl = 'rest/api/' + $scope.folder.id;
+//          if (apiUrl) {
+//            resourceService.getResources(apiUrl).then(function(response) {
+//              $scope.pictureCount = response.totalPictureCount;
+//              $scope.previewImages = response.previewPictures;
+//            });
+//          }
+//        }
         $image = angular.element($element[0].getElementsByClassName('img-preview'));
         $window = angular.element(window);
         // listeners

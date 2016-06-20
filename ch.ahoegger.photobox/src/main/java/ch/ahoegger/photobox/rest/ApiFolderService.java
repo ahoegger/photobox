@@ -40,6 +40,13 @@ public class ApiFolderService {
   @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
   @Path("/{folder}")
   public Folder get(@PathParam("folder") String folderIdRaw) {
+//    try {
+//      Thread.sleep(6000);
+//    }
+//    catch (InterruptedException e) {
+//      // TODO Auto-generated catch block
+//      e.printStackTrace();
+//    }
     boolean sortAsc = true;
     long id = 0L;
     if (folderIdRaw != null) {
@@ -68,14 +75,20 @@ public class ApiFolderService {
     }
 
     // load subfolders
-    folder.setSubFolders(DbFolder.findByParentId(folder.getId(), Boolean.TRUE, sortAsc));
+    List<Folder> subfolders = DbFolder.findByParentId(folder.getId(), Boolean.TRUE, sortAsc);
+    subfolders.forEach(subFolder -> {
+      List<Long> pictureIds = DbPicture.getPictureIds(subFolder.getId(), true);
+      subFolder.setPreviewPictures(createPreviewPictures(pictureIds));
+      subFolder.setTotalPictureCount(pictureIds.size());
+    });
+
+    folder.setSubFolders(subfolders);
     folder.setPictures(DbPicture.findByParentId(folder.getId(), Boolean.TRUE));
     // preview pictures
     List<Long> pictureIds = DbPicture.getPictureIds(folder.getId(), true);
     folder.setPreviewPictures(createPreviewPictures(pictureIds));
     folder.setTotalPictureCount(pictureIds.size());
     return folder;
-
   }
 
   private List<Picture> createPreviewPictures(List<Long> allPictureIds) {
