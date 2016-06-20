@@ -40,13 +40,6 @@ public class ApiFolderService {
   @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
   @Path("/{folder}")
   public Folder get(@PathParam("folder") String folderIdRaw) {
-//    try {
-//      Thread.sleep(6000);
-//    }
-//    catch (InterruptedException e) {
-//      // TODO Auto-generated catch block
-//      e.printStackTrace();
-//    }
     boolean sortAsc = true;
     long id = 0L;
     if (folderIdRaw != null) {
