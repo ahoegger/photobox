@@ -36,7 +36,6 @@
 
         $image.bind('load', function() {
           var imageBounds = $image[0].getBoundingClientRect();
-          console.log('after load: h:' + imageBounds.height + ' w:' + imageBounds.width)
           originalImageSize = {
           width : imageBounds.width,
           height : imageBounds.height
@@ -60,7 +59,6 @@
 
       function _start(xOffset, yOffset, event) {
         eventDetail = new MouseEvent(xOffset, yOffset, event.timeStamp).withEnd(xOffset, yOffset, event.timeStamp);
-        console.log('zoom start with: ', xOffset, yOffset);
         // attach listeners
         $image.on('mousemove', onMouseMove);
         $image.on('touchmove', onTouchMove);
@@ -81,7 +79,7 @@
       function _mouseMove(event) {
         // event.preventDefault();
         // event.stopPropagation();
-        _move(event.pageX, event.pageX, event);
+        _move(event.pageX, event.pageY, event);
       }
       function _touchMove(event) {
         // event.preventDefault();
@@ -92,14 +90,13 @@
       }
       function _move(xPos, yPos, event) {
         eventDetail.withEndPosition(xPos, yPos);
-        // console.log('move: ',xPos,yPos);
-        if (!MouseEvent.isClickOffset(eventDetail)) {
-          _stopZoom();
-        }
         if (isZoomed) {
           event.preventDefault();
           event.stopPropagation();
           imageViewController.move(eventDetail.getEndX() - eventDetail.getStartX(), eventDetail.getEndY() - eventDetail.getStartY());
+        }
+        if (!MouseEvent.isClickOffset(eventDetail)) {
+          _stopZoom();
         }
       }
 
@@ -118,6 +115,7 @@
           });
 
         }
+        _removeListeners();
       }
 
       function _zoom() {
@@ -135,6 +133,11 @@
 
       }
 
+      function _removeListeners(){
+        $image.off('mousemove', onMouseMove);
+        $image.off('touchmove', onTouchMove);
+        $image.off('mouseup touchend', onEnd);
+      }
       function _handleClick() {
         imageViewController.resetZoom();
       }

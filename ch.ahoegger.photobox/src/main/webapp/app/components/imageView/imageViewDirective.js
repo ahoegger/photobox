@@ -27,7 +27,6 @@
       var debouncePromise;
       var debounce = $scope.debounce || 200;
       var onWindowResize = function(){
-        console.log('['+$scope.imageId+']: resized!!!');
         var containerSize = $element[0].getBoundingClientRect();
         imageViewController.setContainerSize(containerSize.width, containerSize.height);
         _debouncedLayoutImage();
@@ -64,7 +63,6 @@
         
         $scope.$watch('rotation', function(newVal) {
           if (angular.isDefined($scope.rotation)) {
-            console.log('['+$scope.imageId+']: rotation changed!!!');
             imageViewController.setRotation($scope.rotation);
             _debouncedLayoutImage();
           }
@@ -77,7 +75,6 @@
 
         $image.bind('load', function() {
           imageViewController.setInitialSize(this.naturalWidth, this.naturalHeight);
-          console.log('['+$scope.imageId+']: after load!!!');
           _layoutImage();
           $timeout(function(){
             $image.addClass('animated visible');

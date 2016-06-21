@@ -13,7 +13,6 @@
     var zoomData;
 
     (function _init() {
-      console.log('imageViewController init', $scope.rotation);
     })();
 
     self.setImage = function($img) {
@@ -40,10 +39,8 @@
       if (!initalImageSize || !$image) {
         return;
       }
-      console.log('DO LAYOUT ' + rotation);
 
       var size = _calculateLayoutSize();
-      console.log('LAYOUT - calculatedSize: ', size);
       var originOffset = _calculateLayoutOriginOffset(size);
       if (originOffset) {
         zoomData.setOffsetX(originOffset.left);
@@ -62,95 +59,9 @@
       transform : 'rotate(' + $scope.rotation + 'deg)'
       };
       
-      console.log('INITIAL: ', initalImageSize);
-      console.log('CSS: ', css);
-      // if ((rotation / 90) % 2 !== 0) {
-      // css.width = height+ 'px';
-      // css.height= width + 'px';
-      // }
       $image.css(css);
       return;
 
-      var imgWidth, imgHeight;
-      var width, height;
-      var imgWidthTransformed, imgHeightTransformed;
-
-      imgWidth = initalImageSize.width;
-      imgHeight = initalImageSize.height;
-      if ((rotation / 90) % 2 == 0) {
-        imgWidthTransformed = imgWidth;
-        imgHeightTransformed = imgHeight;
-      } else {
-        imgWidthTransformed = imgHeight;
-        imgHeightTransformed = imgWidth;
-      }
-      width = imgWidth;
-      height = imgHeight;
-
-      var scaleFactor = containerSize.width / imgWidthTransformed;
-      scaleFactor = Math.min(scaleFactor, containerSize.height / imgHeightTransformed);
-      if (zoomData) {
-        scaleFactor = scaleFactor * zoomData.getFactor();
-      }
-      width = width * scaleFactor;
-      height = height * scaleFactor;
-
-      if (zoomData) {
-        if (zoomData.getOriginX() && zoomData.getOriginY()) {
-          var rotCorrLeft = 0;
-          if ((rotation / 90) % 2 !== 0) {
-            rotCorrLeft = imgWidth / 2 - imgHeight / 2;
-          }
-          console.log("w/h - t/l: ", width, height, top, left);
-          if (left + rotCorrLeft < 0) {
-            var calcLeft = containerSize.width / 2 - zoomData.getOriginX() * width;
-            calcLeft = Math.min(calcLeft, rotCorrLeft);
-            calcLeft = Math.max(calcLeft, containerSize.width - width);
-            // update offsetX
-            zoomData.setOffsetX(calcLeft - left);
-            zoomData.setDeltaX(0);
-            left = calcLeft;
-          }
-          if (top < 0) {
-            var calcTop = containerSize.height / 2 - zoomData.getOriginY() * height;
-            calcTop = Math.min(calcTop, 0);
-            calcTop = Math.max(calcTop, containerSize.height - height);
-            zoomData.setOffsetY(calcTop - top);
-            zoomData.setDeltaY(0);
-            top = calcTop;
-
-          }
-        } else {
-          // ensure image bounds
-          var deltaX = 0;
-          var deltaY = 0;
-          if (left < 0) {
-            deltaX = Math.min(Math.abs(left), (zoomData.getOffsetX() + zoomData.getDeltaX()));
-            deltaX = Math.max(left, (containerSize.width - width), deltaX);
-          }
-          if (top < 0) {
-            deltaY = Math.min(Math.abs(top), (zoomData.getOffsetY() + zoomData.getDeltaY()));
-            deltaY = Math.max(top, (containerSize.height - height), deltaY);
-          }
-          left += deltaX;
-          top += deltaY;
-        }
-      }
-
-      var css = {
-      top : top + 'px',
-      left : left + 'px',
-      width : width + 'px',
-      height : height + 'px',
-      transform : 'rotate(' + $scope.rotation + 'deg)'
-      };
-      console.log('INITIAL: ', initalImageSize);
-      console.log('CSS: ', css);
-      // if ((rotation / 90) % 2 !== 0) {
-      // css.width = height+ 'px';
-      // css.height= width + 'px';
-      // }
-      $image.css(css);
     };
 
     function _calculateLayoutSize() {
@@ -226,7 +137,6 @@
     }
 
     function _calculatePosition(size, offset) {
-      console.log('_calculatePosition offset: ', offset, size);
       var wTrans = size.width;
       var hTrans = size.height;
       var deltaTop = 0;
@@ -276,15 +186,13 @@
     };
 
     self.startZoom = function(positionX, positionY) {
-      console.log('start zoom x/y: ', positionX, positionY);
       var imgBounds = $image[0].getBoundingClientRect();
-      console.log('startZoom: ', imgBounds);
-      
       var originX = 1 / imgBounds.width * (positionX - imgBounds.left);
       var originY = 1 / imgBounds.height * (positionY - imgBounds.top);
-      console.log('start origin x/y: ', originX, originY);
       if (!zoomData) {
         zoomData = new ZoomData();
+        zoomData.setFullScreenBeforeZoom($scope.fullScreen);
+        $scope.fullScreen = true;
       }
       zoomData.setOriginX(originX);
       zoomData.setOriginY(originY);
@@ -297,8 +205,7 @@
         zoomData.incrementFactor(0.015);
         self.layout();
       }, 15));
-      zoomData.setFullScreenBeforeZoom($scope.fullScreen);
-      $scope.fullScreen = !$scope.fullScreen;
+
     };
 
     self.stopZoom = function() {
@@ -306,11 +213,10 @@
         if (zoomData.getInterval()) {
           clearInterval(zoomData.getInterval());
           zoomData.setInterval();
+          $scope.imageSrc = $filter('imageSizeFilter')($scope.imageId, $image[0].getBoundingClientRect());
         }
         zoomData.setOriginX();
         zoomData.setOriginY();
-        $scope.imageSrc = $filter('imageSizeFilter')($scope.imageId, $image[0].getBoundingClientRect());
-        console.log('image: ' + $scope.imageSrc);
       }
     };
 
@@ -333,8 +239,7 @@
 
   Controller.$inject = [ '$scope', '$filter', 'zoomDataFactory' ];
 
-  // TODO ngDoc
-  function ZoomDataFactory() {
+ function ZoomDataFactory() {
 
     function ZoomData() {
       this.originX;

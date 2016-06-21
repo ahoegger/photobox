@@ -68,7 +68,6 @@
       }
 
       function _debouncedUpdateHeight() {
-        console.log('DEBUONCED folder preview height');
         if (debouncePromise) {
           $timeout.cancel(debouncePromise);
 

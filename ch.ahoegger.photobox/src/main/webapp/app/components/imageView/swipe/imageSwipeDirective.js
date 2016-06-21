@@ -62,11 +62,9 @@
           }
         }
         $scope.$watch('files', function(newFiles) {
-          console.log('files changed: ', newFiles);
           _initialUpdateImagesDebounced();
         });
         $scope.$watch('index', function(newIndexRaw) {
-          console.log('index changed: ', newIndexRaw);
           var newIndex = undefined;
           if (angular.isDefined(newIndexRaw)) {
             newIndex = parseInt(newIndexRaw);
@@ -171,7 +169,6 @@
       }
 
       function _updatePositionsDebounced(deltaX) {
-        console.log('debounced update positions...');
         if (debouncePromise) {
           $timeout.cancel(debouncePromise)
           debouncePromise = undefined;
@@ -183,7 +180,6 @@
 
       function _updatePositions(deltaXRaw) {
         var elementWidth = $container[0].getBoundingClientRect().width;
-        console.log('update positions: ' + elementWidth);
         var deltaX = deltaXRaw || 0;
         deltaX = Math.min(Math.abs(deltaX), elementWidth) * Math.sign(deltaX);
         var index = -1;
@@ -197,7 +193,6 @@
             left : left + 'px',
             opacity : opacity + ''
             });
-            console.log('css img ' + (i + 1) + ' = ' + ((i * elementWidth) + deltaX) + 'px');
           }
         }
 
@@ -299,7 +294,6 @@
         startTimeStamp = event.timeStamp;
         event.preventDefault();
         // event.stopPropagation();
-        console.log('touch start!!!');
         var touch = event.originalEvent.touches[0];
         _dragStart(touch.pageX);
       }
@@ -307,17 +301,14 @@
         startTimeStamp = event.timeStamp;
         event.preventDefault();
         // event.stopPropagation();
-        console.log('mouse down!!!');
         _dragStart(event.pageX);
       }
       function _dragStart(xPosition) {
         if (swiping) {
           return;
         }
-        console.log('add listeners...');
         _setAnimated(false);
         swipeStartX = xPosition;
-        console.log('dragStart');
         $document.on('mousemove', onMouseMove);
         $document.on('touchmove', onTouchMove);
         $document.on('mouseup touchend', onMoveEnd);
@@ -357,7 +348,6 @@
         if (!swiping) {
           return;
         }
-        console.log('move end!!! remove listeners')
         $document.off('mousemove', onMouseMove);
         $document.off('touchmove', onTouchMove);
         $document.off('mouseup touchend', onMoveEnd);

@@ -30,22 +30,6 @@
         $window = angular.element(window);
         $scope.imageUrl = $filter('imageSizeFilter')($scope.image.id, $element[0].getBoundingClientRect());
 
-//        var watchDimension = 'width';
-//        var oppositeDimension = 'height';
-//        if ($scope.fixedHeight) {
-//          console.log('watch height');
-//        }
-//        // initial height = width
-//        var containerSize = $imageContainer[0].getBoundingClientRect()[watchDimension];
-//        $imageContainer.css(oppositeDimension, containerSize);
-//
-//        $scope.$watch(function() {
-//          return $imageContainer[0].getBoundingClientRect()[watchDimension];
-//        }, function(newValue, oldValue) {
-//          if (newValue && newValue !== oldValue) {
-//            $imageContainer.css(oppositeDimension, newValue);
-//          }
-//        }, true);
 
         if ($scope.imageSelection) {
           $scope.clickCallback = function(event) {
@@ -70,16 +54,10 @@
             _debouncedCenterImage();
           }
         })
-//        $window.bind('resize', onWindowResize);
-//
-//        $scope.$on('$destroy', function() {
-//          $window.unbind('resize', onWindowResize);
-//        });
 
       })();
 
       function _debouncedCenterImage() {
-        console.log('DEBUONCED CENTER');
         if (debouncePromise) {
           $timeout.cancel(debouncePromise);
 
@@ -142,7 +120,6 @@
       })();
 
       function _debouncedUpdateWidth(width) {
-        console.log('DEBUONCED set width of preview');
         if (debouncePromise) {
           $timeout.cancel(debouncePromise);
 
@@ -182,7 +159,6 @@
       })();
 
       function _debouncedUpdateHeight(height) {
-        console.log('DEBUONCED setHeight of preview');
         if (debouncePromise) {
           $timeout.cancel(debouncePromise);
 
