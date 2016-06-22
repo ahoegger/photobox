@@ -14,6 +14,7 @@
     controller: 'imageViewController',
     require: '^photoboxImageView',
     scope : {
+      image : '=',
     imageId : '@',
     rotation : '=',
     controller : '=',
@@ -37,7 +38,7 @@
         imageViewController.setImage($image);
         $window = angular.element(window);
 
-        $scope.imageSrc = $filter('imageSizeFilter')($scope.imageId, $element[0].getBoundingClientRect());
+        $scope.imageSrc = $filter('imageSizeFilter')($scope.image.imageData.id, $element[0].getBoundingClientRect());
         var containerSize = $element[0].getBoundingClientRect();
         imageViewController.setContainerSize(containerSize.width, containerSize.height);
         // listeners
@@ -60,18 +61,11 @@
           // do it
           imageViewController.setContainerSize(newValue.width, newValue.height);
         },true);
-        
-        $scope.$watch('rotation', function(newVal) {
-          if (angular.isDefined($scope.rotation)) {
-            imageViewController.setRotation($scope.rotation);
-            _debouncedLayoutImage();
-          }
+        imageViewController.setRotation($scope.image.imageData.rotation);
+        $scope.$watch('image.imageData.rotation', function(newVal) {
+          imageViewController.setRotation(newVal);
+          _debouncedLayoutImage();
         });
-        if ($scope.imageSelection) {
-          $scope.clickCallback = function(event) {
-            $scope.imageSelection(event);
-          }
-        }
 
         $image.bind('load', function() {
           imageViewController.setInitialSize(this.naturalWidth, this.naturalHeight);

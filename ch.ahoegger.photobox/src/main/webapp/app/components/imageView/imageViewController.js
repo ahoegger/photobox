@@ -60,7 +60,7 @@
       left : position.left + 'px',
       width : size.width + 'px',
       height : size.height + 'px',
-      transform : 'rotate(' + $scope.rotation + 'deg)'
+      transform : 'rotate(' + rotation + 'deg)'
       };
       
       $image.css(css);
@@ -197,7 +197,6 @@
       if (!zoomData) {
         zoomData = new ZoomData();
         zoomData.setFullScreenBeforeZoom($scope.controller.getFullScreen());
-//        $scope.fullScreen = true;
         $scope.controller.setFullScreen(true);
       }
       zoomData.setOriginX(originX);
@@ -230,7 +229,6 @@
       if (zoomData) {
         console.log('reset zoom');
         $scope.controller.setFullScreen(zoomData.getFullScreenBeforeZoom());
-//        $scope.fullScreen = zoomData.getFullScreenBeforeZoom();
         zoomData = undefined;
         self.layout();
       }

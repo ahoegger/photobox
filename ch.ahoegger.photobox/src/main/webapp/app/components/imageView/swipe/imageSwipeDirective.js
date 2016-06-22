@@ -15,10 +15,6 @@
     files : '=',
     index : '=',
     controller : '=',
-    imageSelection : '=?',
-    indexUpdated : '=?',
-    rotateLeft : '=?',
-    rotateRight : '=?',
     debounce : '@?'
     },
     link : function($scope, $element, $attrs) {
@@ -56,11 +52,6 @@
         }.bind(this);
         // listeners
 
-        if ($scope.imageSelection) {
-          $scope.clickCallback = function(event) {
-            $scope.imageSelection(event);
-          }
-        }
         $scope.$watch('files', function(newFiles) {
           _initialUpdateImagesDebounced();
         });
@@ -124,11 +115,12 @@
           var left = -100;
           for (i = -1; i < 2; i++) {
             if (i + currentIndex >= 0 && i + currentIndex < files.length) {
-              source = '<photobox-image-view photobox-image-zoom photobox-image-full-screen-support class="animated" controller="controller" image-selection="clickCallback" ' + 'image-id="' + $scope.files[i + currentIndex].id + '" ' + 'rotation="files[' + (i + currentIndex) + '].rotation"' + '></photobox-image-view>';
+              source = '<photobox-image-view photobox-image-zoom photobox-image-full-screen-support class="animated" controller="controller" image="::image"></photobox-image-view>';
               // source = '<photobox-image-view image-selection="clickCallback"
               // image-src="' + linkFilter($scope.files[i + currentIndex].links,
               // 'Desktop') + '"></photobox-image-view>';
               var childScope = $scope.$new();
+              childScope.image = $scope.files[i + currentIndex];
               // var childScope = $scope;
               var $img = $compile(source)(childScope);
               $images[i + 1] = {
@@ -260,11 +252,12 @@
       }
 
       function _createImageView(fileIndex, append) {
-        var source = '<photobox-image-view photobox-image-zoom photobox-image-full-screen-support class="animated"  controller="controller" image-selection="clickCallback"  image-id="' + $scope.files[fileIndex].id + '" rotation="files[' + fileIndex + '].rotation"></photobox-image-view>';
+        var source = '<photobox-image-view photobox-image-zoom photobox-image-full-screen-support class="animated"  controller="controller" image="::image"></photobox-image-view>';
         // var source = '<photobox-image-view image-selection="clickCallback"
         // image-src="' + linkFilter($scope.files[fileIndex].links, 'Desktop') +
         // '"></photobox-image-view>';
         var childScope = $scope.$new();
+        childScope.image = $scope.files[fileIndex];
         // var childScope = $scope;
 
         var $image = $compile(source)(childScope);
@@ -280,9 +273,7 @@
       }
 
       function _notifyIndexUpdated(index) {
-        if ($scope.indexUpdated) {
-          $scope.indexUpdated(index);
-        }
+        $scope.controller.setCurrentIndex(index);
       }
 
       // drag support
@@ -413,15 +404,11 @@
         }
         if (event.ctrlKey) {
           if (event.keyCode === 37) {
-            if ($scope.rotateLeft) {
-              $scope.rotateLeft();
-              event.preventDefault();
-            }
+            $scope.files[$scope.index].rotateLeft();
+            event.preventDefault();
           } else if (event.keyCode === 39) {
-            if ($scope.rotateRight) {
-              $scope.rotateRight();
-              event.preventDefault();
-            }
+            $scope.files[$scope.index].rotateRight();
+            event.preventDefault();
           }
           return;
         }

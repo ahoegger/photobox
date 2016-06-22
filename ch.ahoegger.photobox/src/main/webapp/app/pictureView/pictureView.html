@@ -1,13 +1,9 @@
 <div id="picturebox-picture-view"
 	ng-class="{'full-screen' : pictureViewController.fullScreen}">
 
-	<photobox-image-swipe files="pictureViewController.folder.pictures"
+	<photobox-image-swipe files="pictureViewController.images"
 		index="pictureViewController.index"
-		controller="pictureViewController.actions"
-		image-selection="pictureViewController.handleImgClick"
-		index-updated="pictureViewController.handleIndexUpdated"
-		rotate-left="pictureViewController.handleRotateLeft"
-		rotate-right="pictureViewController.handleRotateRight">
+		controller="pictureViewController.actions">
 	</photobox-image-swipe>
 
 	<div class="navigation angular-fade-in-out"
