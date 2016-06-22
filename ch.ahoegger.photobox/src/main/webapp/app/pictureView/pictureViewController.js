@@ -13,6 +13,15 @@
     console.log('folderX: ', $stateParams.folderX);
 
     (function _init() {
+      self.actions = {
+          getFullScreen : function(){
+            return self.fullScreen;
+          },
+          setFullScreen : function (fullScreen){
+            self.fullScreen = fullScreen;
+          }
+      }
+      
       self.fullScreen = false;
       $scope.$watch(function(){
         return self.fullScreen;

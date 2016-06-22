@@ -3,14 +3,15 @@
 
 	<photobox-image-swipe files="pictureViewController.folder.pictures"
 		index="pictureViewController.index"
+		controller="pictureViewController.actions"
 		image-selection="pictureViewController.handleImgClick"
 		index-updated="pictureViewController.handleIndexUpdated"
-		full-screen = "pictureViewController.fullScreen"
 		rotate-left="pictureViewController.handleRotateLeft"
 		rotate-right="pictureViewController.handleRotateRight">
 	</photobox-image-swipe>
 
-	<div class="navigation angular-fade-in-out" ng-if="!pictureViewController.fullScreen")>
+	<div class="navigation angular-fade-in-out"
+		ng-if="!pictureViewController.fullScreen")>
 		<div class="left">
 			<div class="tool-button clickable"
 				ng-click="pictureViewController.navigateFolder()">

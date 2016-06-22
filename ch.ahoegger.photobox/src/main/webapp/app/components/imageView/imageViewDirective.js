@@ -16,7 +16,7 @@
     scope : {
     imageId : '@',
     rotation : '=',
-    fullScreen: '=?',
+    controller : '=',
     imageSelection : '=?',
     debounce : '@?'
     },

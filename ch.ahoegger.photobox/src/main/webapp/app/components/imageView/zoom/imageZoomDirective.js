@@ -121,7 +121,10 @@
       function _zoom() {
         $image.removeClass('animated');
         // calc container relative
-        imageViewController.startZoom(eventDetail.getEndX(), eventDetail.getEndY());
+        $scope.$apply(function(){
+          imageViewController.startZoom(eventDetail.getEndX(), eventDetail.getEndY());          
+        });
+
       }
 
       function _stopZoom() {

@@ -34,6 +34,10 @@
     self.setRotation = function(rot) {
       rotation = rot;
     };
+    
+    self.toggleFullScreen = function(){
+      $scope.controller.setFullScreen(!$scope.controller.getFullScreen());
+    };
 
     self.layout = function() {
       if (!initalImageSize || !$image) {
@@ -92,6 +96,7 @@
       if (!zoomData || !zoomData.getOriginX() || !zoomData.getOriginY()) {
         return;
       }
+      console.log('_calculateLayoutOriginOffset x/y:',zoomData.getOriginX(),zoomData.getOriginY());
       return {
         left:0,
         top:0
@@ -191,8 +196,9 @@
       var originY = 1 / imgBounds.height * (positionY - imgBounds.top);
       if (!zoomData) {
         zoomData = new ZoomData();
-        zoomData.setFullScreenBeforeZoom($scope.fullScreen);
-        $scope.fullScreen = true;
+        zoomData.setFullScreenBeforeZoom($scope.controller.getFullScreen());
+//        $scope.fullScreen = true;
+        $scope.controller.setFullScreen(true);
       }
       zoomData.setOriginX(originX);
       zoomData.setOriginY(originY);
@@ -222,7 +228,9 @@
 
     self.resetZoom = function() {
       if (zoomData) {
-        $scope.fullScreen = zoomData.getFullScreenBeforeZoom();
+        console.log('reset zoom');
+        $scope.controller.setFullScreen(zoomData.getFullScreenBeforeZoom());
+//        $scope.fullScreen = zoomData.getFullScreenBeforeZoom();
         zoomData = undefined;
         self.layout();
       }
