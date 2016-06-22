@@ -114,10 +114,8 @@
           _notifyIndexUpdated(currentIndex);
         }
         // remove old
-        $images.forEach(function($img) {
-          if ($img) {
-            $img.remove();
-          }
+        $images.forEach(function(img) {
+          _removeImage(img);
         });
         var source;
         if (angular.isDefined($scope.index) && files) {
@@ -130,8 +128,13 @@
               // source = '<photobox-image-view image-selection="clickCallback"
               // image-src="' + linkFilter($scope.files[i + currentIndex].links,
               // 'Desktop') + '"></photobox-image-view>';
-              $images[i + 1] = $compile(source)($scope);
-              $images[i + 1].appendTo($container[0]);
+              var childScope = $scope.$new();
+              var $img = $compile(source)(childScope);
+              $images[i + 1] = {
+              $element : $img,
+              $scope : childScope
+              };
+              $img.appendTo($container[0]);
 
             }
             left += 100;
@@ -141,31 +144,38 @@
         }
       }
 
-      
-      function _setAnimated(animated){
-        var fun = function($img){
-          if(animated){
+      function _removeImage(image) {
+        if (image && image.$element) {
+          image.$scope.$destroy();
+          image.$element.remove();
+        }
+      }
+
+      function _setAnimated(animated) {
+        var fun = function($img) {
+          if (animated) {
             $img.addClass('animated');
-          }
-          else{
+          } else {
             $img.removeClass('animated');
           }
         };
-        $images.forEach(function ($img){
-          if($img){
-            fun($img);
+        $images.forEach(function($img) {
+          if ($img && $img.$element) {
+            fun($img.$element);
           }
         });
       }
-      
-      function _setCurrentImage($image) {
-        if ($currentImage) {
+
+      function _setCurrentImage(image) {
+        if ($currentImage && $currentImage.$element) {
           _removeDragListener($currentImage);
-          $currentImage.removeClass('current');
+          $currentImage.$element.removeClass('current');
         }
-        $currentImage = $image;
-        $image.addClass('current');
-        _addDragListeners($currentImage);
+        $currentImage = image;
+        if ($currentImage && $currentImage.$element) {
+          $currentImage.$element.addClass('current');
+          _addDragListeners($currentImage);
+        }
       }
 
       function _updatePositionsDebounced(deltaX) {
@@ -185,11 +195,11 @@
         var index = -1;
         var i;
         for (i = -1; i < 2; i++) {
-          if ($images[i + 1]) {
+          if ($images[i + 1] && $images[i + 1].$element) {
             var left = (i * elementWidth) + deltaX;
             var opacity = (elementWidth - Math.abs(left / 1.5)) / elementWidth;
 
-            $images[i + 1].css({
+            $images[i + 1].$element.css({
             left : left + 'px',
             opacity : opacity + ''
             });
@@ -207,7 +217,7 @@
         currentIndex--;
         // remove last
         if ($images[2]) {
-          $images[2].remove();
+          _removeImage($images[2]);
         }
         // shift
         $images[2] = $images[1];
@@ -232,7 +242,7 @@
         currentIndex++;
         // remove last
         if ($images[0]) {
-          $images[0].remove();
+          _removeImage($images[0]);
         }
         // shift
         $images[0] = $images[1];
@@ -253,13 +263,18 @@
         // var source = '<photobox-image-view image-selection="clickCallback"
         // image-src="' + linkFilter($scope.files[fileIndex].links, 'Desktop') +
         // '"></photobox-image-view>';
-        var $image = $compile(source)($scope);
+        var childScope = $scope.$new();
+
+        var $image = $compile(source)(childScope);
         if (append) {
           $image.appendTo($container[0]);
         } else {
           $image.prependTo($container[0]);
         }
-        return $image;
+        return {
+        $element : $image,
+        $scope : childScope
+        };
       }
 
       function _notifyIndexUpdated(index) {
@@ -281,13 +296,17 @@
       var endTimeStamp;
 
       function _addDragListeners($image) {
-        $image.on('mousedown', onMouseDown);
-        $image.on('touchstart', onTouchStart);
+        if ($image && $image.$element) {
+          $image.$element.on('mousedown', onMouseDown);
+          $image.$element.on('touchstart', onTouchStart);
+        }
       }
 
       function _removeDragListener($image) {
-        $image.off('mousedown', onMouseDown);
-        $image.off('touchstart', onTouchStart);
+        if ($image && $image.$element) {
+          $image.$element.off('mousedown', onMouseDown);
+          $image.$element.off('touchstart', onTouchStart);
+        }
       }
 
       function _touchStart(event) {
@@ -386,12 +405,12 @@
           _updatePositions(0);
         }
       }
-      
-      function _handleImageSelection(){
+
+      function _handleImageSelection() {
         $scope.imageSelection($scope.files[currentIndex]);
       }
-      
-      function _handleImageDoubleSelection(){
+
+      function _handleImageDoubleSelection() {
       }
 
       function _handleKeyDown(event) {
@@ -413,10 +432,15 @@
           return;
         }
         if (event.keyCode === 37) {
+          $scope.$apply(function(){
           _snapPrevious();
+          });
           event.preventDefault();
         } else if (event.keyCode === 39) {
-          _snapNext();
+          $scope.$apply(function(){
+            _snapNext();            
+          });
+
           event.preventDefault();
         }
 
