@@ -53,6 +53,7 @@
         zoomData.setDeltaY(0);
       }
       var offset = _calculateMoveOffset();
+      console.log('offset: ', offset);
       var position = _calculatePosition(size, offset);
 
       var css = {
@@ -96,37 +97,33 @@
       if (!zoomData || !zoomData.getOriginX() || !zoomData.getOriginY()) {
         return;
       }
-      console.log('_calculateLayoutOriginOffset x/y:',zoomData.getOriginX(),zoomData.getOriginY());
+//      console.log('_calculateLayoutOriginOffset x/y:',zoomData.getOriginX(),zoomData.getOriginY());
+//      console.log('$image bounds: ',$image[0].getBoundingClientRect());
+//      console.log('size ', size);
+//      var bounds = $image[0].getBoundingClientRect();
+//      var width = bounds.width;
+//      var height = bounds.height;
+//      var wTrans = width;
+//      var hTrans = height;
+//      if ((rotation / 90) % 2 !== 0) {
+//        wTrans = height;
+//        hTrans = width;
+//      }
+//      var left =   containerSize.width/2 - zoomData.getOriginX() * width;
+//      var top =  containerSize.height/2 -zoomData.getOriginY() * height ;
+//      if ((rotation / 90) % 2 !== 0) {
+//        left = left + ((height -width) /2);
+//        top  = top + ((width -height) /2);
+//      }
+//      console.log('left/top: ', left, top);
+//      return {
+//        left:left,
+//        top:top
+//      };
       return {
-        left:0,
+        left: 0,
         top:0
       };
-//      var wTrans = size.width;
-//      var hTrans = size.height;
-//      var currentBoundery = $image[0].getBoundingClientRect();
-//      var currSize = {
-//          width : currentBoundery.width,
-//          height: currentBoundery.height
-//      };
-//      if ((rotation / 90) % 2 !== 0) {
-//        wTrans = size.height;
-//        hTrans = size.width;
-//        currSize = {
-//            width : currentBoundery.height,
-//            height: currentBoundery.width
-//        };
-//      }
-//
-//      var left = currentBoundery.left;
-//      var top = currentBoundery.top;
-//
-//
-//      var offset = {
-//      left : -(left + zoomData.getOriginX() * currSize.width - wTrans/2),
-//      top  : -(top + zoomData.getOriginY() * currSize.height - hTrans/2)
-//      };
-//      console.log('_calculateLayoutOriginOffset offset: ', offset);
-//      return offset;
     }
 
     function _calculateMoveOffset() {
