@@ -2,6 +2,7 @@ package ch.ahoegger.photobox.rest;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Calendar;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -12,6 +13,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -71,6 +73,14 @@ public class PictureService {
     }
 
     ResponseBuilder response = Response.ok(picturePath.toFile());
+    Calendar c = Calendar.getInstance();
+    c.add(Calendar.YEAR, 1);
+
+    CacheControl cc = new CacheControl();
+    cc.setPrivate(true);
+    cc.setMaxAge(10000);
+    response.cacheControl(cc);
+
     response.header("Content-Disposition", "attachment; filename=" + picturePath);
     return response.build();
 
