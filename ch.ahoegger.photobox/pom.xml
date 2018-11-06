@@ -10,7 +10,7 @@
 	<properties>
 		<version.jersey>2.22.1</version.jersey>
 		<version.servlet.api>3.0.1</version.servlet.api>
-		<version.quarz>2.2.1</version.quarz>
+		<version.quarz>2.3.0</version.quarz>
 		<webxml.path>${project.basedir}/src/main/webapp/WEB-INF/web.xml</webxml.path>
 		<resource.path>${project.basedir}/src/main/resources/dev</resource.path>
 	</properties>
@@ -20,6 +20,13 @@
 			<properties>
 				<webxml.path>${project.basedir}/src/main/webapp_tariffa/WEB-INF/web.xml</webxml.path>
 				<resource.path>${project.basedir}/src/main/resources/tariffa</resource.path>
+			</properties>
+		</profile>
+		<profile>
+			<id>cube</id>
+			<properties>
+				<webxml.path>${project.basedir}/src/main/webapp_cube/WEB-INF/web.xml</webxml.path>
+				<resource.path>${project.basedir}/src/main/resources/cube</resource.path>
 			</properties>
 		</profile>
 	</profiles>

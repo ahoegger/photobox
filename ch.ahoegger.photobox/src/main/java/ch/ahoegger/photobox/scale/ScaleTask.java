@@ -4,7 +4,6 @@ import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,12 +16,14 @@ import org.slf4j.LoggerFactory;
 public class ScaleTask {
 
   private static final Logger LOG = LoggerFactory.getLogger(ScaleTask.class);
-  private Path m_originalImage;
-  private Path m_destinationFile;
-  private int m_resolution;
+  private final Path m_originalImage;
+  private final Path m_destinationFile;
+  private final int m_resolution;
+  private final BufferedImage m_bufferedImage;
 
-  public ScaleTask(Path originalImage, Path destFile, int resolution) {
+  public ScaleTask(Path originalImage, BufferedImage bufferedImage, Path destFile, int resolution) {
     this.m_originalImage = originalImage;
+    m_bufferedImage = bufferedImage;
     this.m_destinationFile = destFile;
     this.m_resolution = resolution;
   }
@@ -33,7 +34,7 @@ public class ScaleTask {
       return;
     }
     int maxEdge = getResolution();
-    BufferedImage originalImage = getBufferedImage(getOriginalImage());
+    BufferedImage originalImage = getBufferedImage();
     if (originalImage == null) {
       return;
     }
@@ -78,26 +79,8 @@ public class ScaleTask {
 
   }
 
-  private BufferedImage getBufferedImage(Path path) {
-    InputStream is = null;
-    try {
-      is = Files.newInputStream(getOriginalImage());
-      return ImageIO.read(is);
-    }
-    catch (Exception e) {
-      LOG.error(String.format("Could not read file: '%s'.", path), e);
-      return null;
-    }
-    finally {
-      if (is != null) {
-        try {
-          is.close();
-        }
-        catch (Exception e) {
-          LOG.error(String.format("Could not close input stream for file '%s'.", path), e);
-        }
-      }
-    }
+  private BufferedImage getBufferedImage() {
+    return m_bufferedImage;
   }
 
   private void writeFile(BufferedImage image, Path path) {

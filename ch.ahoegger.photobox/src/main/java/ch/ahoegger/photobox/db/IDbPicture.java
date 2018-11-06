@@ -6,6 +6,7 @@ public interface IDbPicture {
 
   String COL_ID = "ID";
   String COL_CAPTURE_DATE = "CAPTURE_DATE";
+  String COL_HASH = "HASH";
   String COL_NAME = "NAME";
   String COL_ROTATION = "ROTATION";
   String COL_PATH_ORIGINAL = "PATH_ORIGINAL";

@@ -13,6 +13,7 @@ public class Picture implements Serializable {
 
   private String m_name;
   private Date m_captureDate;
+  private int m_hash;
   private Long m_folderId;
   private Integer m_rotation;
   private Boolean m_active;
@@ -45,6 +46,15 @@ public class Picture implements Serializable {
 
   public Picture withCaptureDate(Date captureDate) {
     m_captureDate = captureDate;
+    return this;
+  }
+
+  public int getHash() {
+    return m_hash;
+  }
+
+  public Picture withHash(int hash) {
+    m_hash = hash;
     return this;
   }
 

@@ -13,7 +13,7 @@
 		</job>
 		<trigger>
 			<cron>
-				<name>ScaleJob</name>
+				<name>ScaleJob Chron</name>
 				<job-name>ScaleJob</job-name>
 				<cron-expression>0 0 3 30 * ?</cron-expression>
 			</cron>

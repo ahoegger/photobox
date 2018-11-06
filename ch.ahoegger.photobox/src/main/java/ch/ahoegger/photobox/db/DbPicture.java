@@ -33,8 +33,8 @@ public class DbPicture implements IDbPicture {
             .append(TABLE_NAME)
             .append(" ( ")
             .append(
-                SQL.columns(COL_ID, COL_NAME, COL_CAPTURE_DATE, COL_ROTATION, COL_ACTIVE, COL_PATH_ORIGINAL, COL_PATH_SMALL, COL_PATH_MEDIUM,
-                    COL_PATH_LARGE)).append(") ").append(" VALUES ").append("( ").append("?, ?, ?, ?, ?, ?, ?, ?, ?").append(")");
+                SQL.columns(COL_ID, COL_NAME, COL_CAPTURE_DATE, COL_HASH, COL_ROTATION, COL_ACTIVE, COL_PATH_ORIGINAL, COL_PATH_SMALL, COL_PATH_MEDIUM,
+                    COL_PATH_LARGE)).append(") ").append(" VALUES ").append("( ").append("?, ?, ?, ?, ?, ?, ?, ?, ?, ?").append(")");
         return sqlBuilder.toString();
       }
 
@@ -44,6 +44,7 @@ public class DbPicture implements IDbPicture {
         statement.setLong(parameterIndex++, p.getId());
         statement.setString(parameterIndex++, p.getName());
         statement.setDate(parameterIndex++, SQL.toSqlDate(p.getCaptureDate()));
+        statement.setInt(parameterIndex++, p.getHash());
         statement.setInt(parameterIndex++, p.getRotation());
         statement.setBoolean(parameterIndex++, p.getActive());
         statement.setString(parameterIndex++, p.getPathOrignal());
@@ -75,7 +76,7 @@ public class DbPicture implements IDbPicture {
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("SELECT ")
             .append(
-                SQL.columnsAliased(TABLE_ALIAS, COL_ID, COL_NAME, COL_ACTIVE, COL_CAPTURE_DATE, COL_PATH_LARGE, COL_PATH_MEDIUM, COL_PATH_ORIGINAL, COL_PATH_SMALL, COL_ROTATION))
+                SQL.columnsAliased(TABLE_ALIAS, COL_ID, COL_NAME, COL_ACTIVE, COL_CAPTURE_DATE, COL_HASH, COL_PATH_LARGE, COL_PATH_MEDIUM, COL_PATH_ORIGINAL, COL_PATH_SMALL, COL_ROTATION))
             .append(", ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_PARENT_ID))
             .append(" FROM ").append(TABLE_NAME).append(" AS ").append(TABLE_ALIAS);
         // join parent
@@ -116,7 +117,7 @@ public class DbPicture implements IDbPicture {
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("SELECT ")
             .append(
-                SQL.columnsAliased(TABLE_ALIAS, COL_ID, COL_NAME, COL_ACTIVE, COL_CAPTURE_DATE, COL_PATH_LARGE, COL_PATH_MEDIUM, COL_PATH_ORIGINAL, COL_PATH_SMALL, COL_ROTATION))
+                SQL.columnsAliased(TABLE_ALIAS, COL_ID, COL_NAME, COL_ACTIVE, COL_CAPTURE_DATE, COL_HASH, COL_PATH_LARGE, COL_PATH_MEDIUM, COL_PATH_ORIGINAL, COL_PATH_SMALL, COL_ROTATION))
             .append(", ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_PARENT_ID))
             .append(" FROM ").append(TABLE_NAME).append(" AS ").append(TABLE_ALIAS);
         // join parent
@@ -206,11 +207,12 @@ public class DbPicture implements IDbPicture {
         .withName(res.getString(2))
         .withActive(res.getBoolean(3))
         .withCaptureDate(res.getDate(4))
-        .withPathLarge(res.getString(5))
-        .withPathMedium(res.getString(6))
-        .withPathOrignal(res.getString(7))
-        .withPathSmall(res.getString(8))
-        .withRotation(res.getInt(9));
+        .withHash(res.getInt(5))
+        .withPathLarge(res.getString(6))
+        .withPathMedium(res.getString(7))
+        .withPathOrignal(res.getString(8))
+        .withPathSmall(res.getString(9))
+        .withRotation(res.getInt(10));
   }
 
   public static List<Long> getPictureIds(Long parentId, Boolean active) {

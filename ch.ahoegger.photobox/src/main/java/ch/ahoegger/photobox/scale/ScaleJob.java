@@ -1,6 +1,8 @@
 package ch.ahoegger.photobox.scale;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -9,6 +11,8 @@ import java.nio.file.PathMatcher;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
+
+import javax.imageio.ImageIO;
 
 import org.quartz.DisallowConcurrentExecution;
 import org.slf4j.Logger;
@@ -161,29 +165,36 @@ public class ScaleJob extends AbstractCanceableJob {
 
   }
 
-  private Picture scaleImage(Path original, Long parentId) {
+  private Picture scaleImage(Path original, Long parentId) throws IOException {
+
+    BufferedImage bufferedImage = getBufferedImage(original);
+    int hash = getPictureHash(bufferedImage, original);
 
     Path relPath = m_orignalDirectory.relativize(original);
     Picture picture = DbPicture.findByOrignalPath(PhotoUtility.pathToString(relPath, "/"));
-    if (picture != null) {
+    if (hash == picture.getHash()) {
+      // already correctly parsed
       return picture;
     }
+    if (picture != null) {
+      new DeletePictureTask(picture).run();
+    }
     // scale preview
-    LOG.debug("Scale image '{}'.", original);
+    LOG.debug("{}Scale image '{}'.", (picture != null ? "Re-" : ""), original);
 
     Path previewImg = m_workingDirectory.resolve(IProperties.ImageType.Small.toString()).resolve(relPath);
     if (!Files.exists(previewImg)) {
-      new ScaleTask(original, previewImg, IProperties.RESOLUTION_SMALL).scale();
+      new ScaleTask(original, bufferedImage, previewImg, IProperties.RESOLUTION_SMALL).scale();
     }
     // mobile
     Path mobileImg = m_workingDirectory.resolve(IProperties.ImageType.Medium.toString()).resolve(relPath);
     if (!Files.exists(mobileImg)) {
-      new ScaleTask(original, mobileImg, IProperties.RESOLUTION_MEDIUM).scale();
+      new ScaleTask(original, bufferedImage, mobileImg, IProperties.RESOLUTION_MEDIUM).scale();
     }
     // desktop
     Path desktopImg = m_workingDirectory.resolve(IProperties.ImageType.Large.toString()).resolve(relPath);
     if (!Files.exists(desktopImg)) {
-      new ScaleTask(original, desktopImg, IProperties.RESOLUTION_LARGE).scale();
+      new ScaleTask(original, bufferedImage, desktopImg, IProperties.RESOLUTION_LARGE).scale();
     }
     picture = new Picture()
         .withFolderId(parentId)
@@ -209,6 +220,38 @@ public class ScaleJob extends AbstractCanceableJob {
     }
 
     return picture;
+  }
+
+  private int getPictureHash(BufferedImage bufferedImage, Path absPathOriginal) throws IOException {
+    long size = Files.size(absPathOriginal);
+    int hash = 7;
+    hash = 31 * hash + (int) absPathOriginal.hashCode();
+    hash = 31 * hash + (int) size;
+    hash = 31 * hash + bufferedImage.getWidth();
+    hash = 31 * hash + bufferedImage.getHeight();
+    return hash;
+  }
+
+  private BufferedImage getBufferedImage(Path path) {
+    InputStream is = null;
+    try {
+      is = Files.newInputStream(path);
+      return ImageIO.read(is);
+    }
+    catch (Exception e) {
+      LOG.error(String.format("Could not read file: '%s'.", path), e);
+      return null;
+    }
+    finally {
+      if (is != null) {
+        try {
+          is.close();
+        }
+        catch (Exception e) {
+          LOG.error(String.format("Could not close input stream for file '%s'.", path), e);
+        }
+      }
+    }
   }
 
   public static class DirectoryDesc {

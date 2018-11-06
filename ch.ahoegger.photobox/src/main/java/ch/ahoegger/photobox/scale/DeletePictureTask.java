@@ -2,6 +2,7 @@ package ch.ahoegger.photobox.scale;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 
 import org.slf4j.Logger;
@@ -34,9 +35,14 @@ public class DeletePictureTask implements Runnable {
   public void run() {
     LOG.info("Delete picture '{}'", getPicture());
     try {
-      deleteFile(Configuration.getWorkingDirectory().resolve(IProperties.ImageType.Small.toString()).resolve(getPicture().getPathOrignal()));
-      deleteFile(Configuration.getWorkingDirectory().resolve(IProperties.ImageType.Medium.toString()).resolve(getPicture().getPathOrignal()));
-      deleteFile(Configuration.getWorkingDirectory().resolve(IProperties.ImageType.Large.toString()).resolve(getPicture().getPathOrignal()));
+      try {
+        deleteFile(Configuration.getWorkingDirectory().resolve(IProperties.ImageType.Small.toString()).resolve(getPicture().getPathOrignal()));
+        deleteFile(Configuration.getWorkingDirectory().resolve(IProperties.ImageType.Medium.toString()).resolve(getPicture().getPathOrignal()));
+        deleteFile(Configuration.getWorkingDirectory().resolve(IProperties.ImageType.Large.toString()).resolve(getPicture().getPathOrignal()));
+      }
+      catch (InvalidPathException ex) {
+        LOG.error(String.format("Could not delete picture from filesystem '%s'", getPicture()), ex);
+      }
 
       // delete from db
       DbPicture.delete(getPicture().getId());
