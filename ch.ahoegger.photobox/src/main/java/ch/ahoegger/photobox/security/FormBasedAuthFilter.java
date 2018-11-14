@@ -30,7 +30,6 @@ public class FormBasedAuthFilter implements Filter {
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
     final HttpServletRequest req = (HttpServletRequest) request;
     final HttpServletResponse resp = (HttpServletResponse) response;
-    System.out.println("pathInfo: " + req.getPathInfo() + "; requestURI:" + req.getRequestURI());
     chain.doFilter(req, resp);
   }
 

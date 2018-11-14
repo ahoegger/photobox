@@ -48,7 +48,6 @@ public abstract class AbstractCanceableJob implements Job {
   private class P_SchedulerListener extends SchedulerListenerSupport {
     @Override
     public void schedulerShuttingdown() {
-      System.out.println("shutdown");
       m_canceled = true;
     }
   }

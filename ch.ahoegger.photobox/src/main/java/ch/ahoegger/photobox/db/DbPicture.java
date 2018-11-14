@@ -162,7 +162,7 @@ public class DbPicture implements IDbPicture {
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("SELECT ")
             .append(
-                SQL.columnsAliased(TABLE_ALIAS, COL_ID, COL_NAME, COL_ACTIVE, COL_CAPTURE_DATE, COL_PATH_LARGE, COL_PATH_MEDIUM, COL_PATH_ORIGINAL, COL_PATH_SMALL, COL_ROTATION))
+                SQL.columnsAliased(TABLE_ALIAS, COL_ID, COL_NAME, COL_ACTIVE, COL_CAPTURE_DATE, COL_HASH, COL_PATH_LARGE, COL_PATH_MEDIUM, COL_PATH_ORIGINAL, COL_PATH_SMALL, COL_ROTATION))
             .append(", ").append(SQL.columnsAliased(IDbNavigationLink.TABLE_ALIAS, IDbNavigationLink.COL_PARENT_ID))
             .append(" FROM ").append(TABLE_NAME).append(" AS ").append(TABLE_ALIAS);
         // join parent

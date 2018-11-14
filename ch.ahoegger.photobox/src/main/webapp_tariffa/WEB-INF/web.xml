@@ -46,6 +46,7 @@
 		<web-resource-collection>
 			<web-resource-name>public</web-resource-name>
 			<url-pattern>/styles/main.css</url-pattern>
+			<url-pattern>/icons/favicon.ico</url-pattern>
 		</web-resource-collection>
 		<!-- OMIT auth-constraint -->
 	</security-constraint>

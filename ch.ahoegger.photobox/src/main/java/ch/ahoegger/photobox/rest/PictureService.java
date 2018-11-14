@@ -5,7 +5,6 @@ import java.nio.file.Paths;
 import java.util.Calendar;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.inject.Singleton;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.GET;
@@ -43,11 +42,6 @@ public class PictureService {
     if (!Files.isDirectory(m_workingDirectory)) {
       throw new IllegalArgumentException(String.format("Working directory '%s' does not exist.", workingDirectoryName));
     }
-  }
-
-  @PreDestroy
-  protected void destroy() {
-    System.out.println("destroy");
   }
 
   @GET

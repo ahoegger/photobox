@@ -172,7 +172,7 @@ public class ScaleJob extends AbstractCanceableJob {
 
     Path relPath = m_orignalDirectory.relativize(original);
     Picture picture = DbPicture.findByOrignalPath(PhotoUtility.pathToString(relPath, "/"));
-    if (hash == picture.getHash()) {
+    if (picture != null && hash == picture.getHash()) {
       // already correctly parsed
       return picture;
     }
@@ -202,6 +202,7 @@ public class ScaleJob extends AbstractCanceableJob {
         .withActive(true)
         .withRotation(0)
         .withCaptureDate(PhotoUtility.getCreationDate(original))
+        .withHash(hash)
         .withPathOrignal(PhotoUtility.pathToString(relPath, "/"))
         .withPathSmall(PhotoUtility.pathToString(m_workingDirectory.relativize(previewImg), "/"))
         .withPathMedium(PhotoUtility.pathToString(m_workingDirectory.relativize(mobileImg), "/"))

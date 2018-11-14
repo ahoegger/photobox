@@ -27,7 +27,6 @@ import ch.ahoegger.photobox.db.DbPicture;
 public class ApiFolderService {
 
   public ApiFolderService() {
-    System.out.println("API FOLDER SERVICE CONST");
   }
 
   @GET
